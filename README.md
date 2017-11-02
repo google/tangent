@@ -146,7 +146,7 @@ dfdparams = tangent.grad(f)
 
 You can perform other backward-pass tricks with `insert_grad_of`, such as stop gradients (use a `break` in the inlined code to stop a for loop), or synthetic gradients (replace a derivative with a prediction from a neural network). This feature lets Tangent users easily debug their models, or quickly try out derivative tweaks in the backward pass.
 
-## Forward Mode and Hessian-Vector Products
+## Forward Mode
 
 Reverse-mode autodiff, or backpropagation, generates efficient derivatives for the types of functions we use in machine learning, where there are usually many (perhaps millions) of input variables and only a single output (our loss). When the inverse is true, where there are many more outputs than inputs, reverse mode is not an efficient algorithm, as it has to be run as many times as there are output variables. However, a less famous algorithm, forward-mode autodiff, only has to be run as many times as there are _input_ variables.). Tangent supports forward-mode autodiff.
 
@@ -162,6 +162,8 @@ forward_df = tangent.grad(f, mode='forward')
 ```
 
 ![SCT Forward Mode](docs/sct-ad-forward.gif "SCT Forward Mode")
+
+## Hessian-Vector Products
 
 Although we won’t dig into the technical details, forward-mode is very useful when combined with reverse-mode to calculate efficient higher-order derivatives, particularly for Hessian-vector products (HVP) of NNs. This is useful in research applications, and usually very painful and slow to calculate. TensorFlow has 3rd-party support for forward-mode, as does Autograd.
 
