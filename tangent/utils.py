@@ -24,7 +24,6 @@ from __future__ import division
 from copy import copy as native_copy
 import types
 
-import six
 import autograd
 import numpy
 
@@ -260,7 +259,7 @@ grad_initializers = {
     numpy.float64: (lambda obj: 0.0, False),
     list: (lambda obj: [init_grad(el) for el in obj], False),
     tuple: (lambda obj: [init_grad(el) for el in obj], False),
-    dict: (lambda obj: {k: init_grad(v) for k, v in six.iteritems(obj)}, False),
+    dict: (lambda obj: {k: init_grad(v) for k, v in obj.iteritems()}, False),
     Stack: (lambda obj: Stack(), False),
     float: (lambda obj: 0.0, False),
     int: (lambda obj: 0, False),
@@ -269,8 +268,6 @@ grad_initializers = {
 
 if hasattr(types, 'ClassType'):
   grad_initializers[types.ClassType] = (init_common_object, False)
-else:
-  grad_initializers[type] = (init_common_object, False)
 
 
 class ZeroGradient(object):
