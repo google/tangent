@@ -16,7 +16,7 @@ from copy import deepcopy
 
 from autograd import grad as ag_grad
 from autograd import value_and_grad as ag_value_and_grad
-from autograd.core import vspace
+from autograd.misc.flatten import flatten
 from autograd.errors import AutogradHint
 import autograd.numpy as ag_np
 import numpy as np
@@ -89,18 +89,19 @@ def numeric_grad(func, eps=1e-6):
   Adapted from github.com/hips/autograd
   """
   def g(x, *args):
-    fd_grad = vspace(x).flatten(tangent.init_grad(x))
+    fd_grad, unflatten_fd = flatten(tangent.init_grad(x))
     y = func(deepcopy(x), *args)
     seed = np.ones_like(y)
     for d in range(fd_grad.size):
-      x_flat = vspace(x).flatten(deepcopy(x))
+      x_flat, unflatten_x = flatten(deepcopy(x))
       x_flat[d] += eps / 2
-      a = np.array(func(vspace(x).unflatten(x_flat), *args))
-      x_flat = vspace(x).flatten(deepcopy(x))
+      a = np.array(func(unflatten_x(x_flat), *args))
+      x_flat, unflatten_x = flatten(deepcopy(x))
       x_flat[d] -= eps / 2
-      b = np.array(func(vspace(x).unflatten(x_flat), *args))
+      b = np.array(func(unflatten_x(x_flat), *args))
       fd_grad[d] = np.dot((a - b) / eps, seed)
-    return vspace(x).unflatten(fd_grad, x)
+    return unflatten_fd(fd_grad)
+
   return g
 
 
@@ -182,5 +183,3 @@ def test_forward_array(func, wrt, preserve_result, *args):
 
   assert_result_matches_reference(tangent_func, reference_func,
                                   backup_reference_func)
-
-

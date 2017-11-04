@@ -36,8 +36,11 @@ Here's Tangent in action in the IPython console.
 
 ### Installation
 
-The easiest way to install is by cloning the git repo. Then from the root
-directory, use either of the methods listed below. We'll have pip and conda packages shortly.
+The easiest way to install is by cloning the git repo. Then from the root directory, use either of the methods listed below. We'll have pip and conda packages shortly.
+
+Note: The commands below will by default install the CPU build for TensorFlow. To use the GPU build, use:
+
+    pip install tf-nightly-gpu
 
 #### Conda
 

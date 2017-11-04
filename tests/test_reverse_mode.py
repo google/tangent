@@ -23,7 +23,7 @@ Pass --short for a quick run.
 import sys
 
 from autograd import grad as ag_grad
-from autograd.core import vspace
+from autograd.misc.flatten import flatten
 import autograd.numpy as ag_np
 import numpy as np
 import pytest
@@ -150,7 +150,9 @@ def test_dict_saxpy(motion, optimized, a, b, c):
 
   df_num = utils.numeric_grad(func)
   dx_num = df_num(dict(a=float(a), b=float(b), c=float(c)))
-  assert np.allclose(vspace(dx).flatten(dx), vspace(dx).flatten(dx_num))
+  flat_dx, _ = flatten(dx)
+  flat_dx_num, _ = flatten(dx_num)
+  assert np.allclose(flat_dx, flat_dx_num)
 
 
 def test_unpacking_args_saxpy(motion, optimized, a, b, c):

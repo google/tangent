@@ -64,7 +64,8 @@ class ResolveCalls(gast.NodeVisitor):
     # then we'll switch to tracing the function.
     if hasattr(func, 'should_trace'):
       func = tracing.Traceable
-    elif isinstance(func, autograd.core.primitive):
+    elif hasattr(func, 'fun'):
+      # TODO: use a less dicey API to check if a function is autograd-wrapped
       # Autograd primitives keep around their original wrapped function.
       # We need that to be the func annotation, otherwise we'd have to
       # redefine derivatives for all autograd wrapped versions of NumPy.

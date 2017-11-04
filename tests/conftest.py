@@ -20,9 +20,16 @@ import tfe_utils
 
 
 blacklisted = [
-    'inlining_contextmanager', 'listcomp', 'cart2polar',
-    'iterpower_with_nested_def', 'fn_multiple_return', 'grad_of', '_trace_mul',
-    '_nontrace_mul'
+    'inlining_contextmanager',
+    'listcomp',
+    'cart2polar',
+    'iterpower_with_nested_def',
+    'fn_multiple_return',
+    'grad_of',
+    '_trace_mul',
+    '_nontrace_mul',
+    'active_subscript',  # TODO: blacklisted until 1.2 autograd release
+    'init_array_grad_maybe_active',  # TODO: blacklisted as well
 ]
 
 funcs = [f for f in functions.__dict__.values() if callable(f)]
