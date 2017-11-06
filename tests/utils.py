@@ -17,7 +17,6 @@ from copy import deepcopy
 from autograd import grad as ag_grad
 from autograd import value_and_grad as ag_value_and_grad
 from autograd.misc.flatten import flatten
-from autograd.errors import AutogradHint
 import autograd.numpy as ag_np
 import numpy as np
 import tangent
@@ -67,7 +66,7 @@ def assert_result_matches_reference(
   tangent_value = tangent_func()
   try:
     reference_value = reference_func()
-  except (ImportError, TypeError, AutogradHint) as e:
+  except (ImportError, TypeError) as e:
     if __debug__:
       print('WARNING: Reference function call failed. The test will revert to '
             'the backup reference.\nReason for failure: %s' % e)
