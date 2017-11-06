@@ -12,8 +12,8 @@
 #      See the License for the specific language governing permissions and
 #      limitations under the License.
 """TensorFlow extensions."""
-
 from __future__ import absolute_import
+
 import numpy as np
 from tangent import grads
 from tangent import tangents
@@ -26,12 +26,9 @@ from tangent.utils import register_all_add_grad
 from tangent.utils import register_init_grad
 from tangent.utils import register_unbroadcast
 from tangent.utils import register_unreduce
-
 import tensorflow as tf
 from tensorflow.python.framework import ops
 from tensorflow.python.ops import resource_variable_ops
-
-d = None  # Prevents flake8 errors
 
 
 def size(x, axis):

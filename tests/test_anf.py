@@ -37,7 +37,7 @@ def test_anf():
   h = g
 
   def f(x):
-    y = g(h(x))  # noqa
+    y = g(h(x))
     return y
 
   assert anf_lines(f)[1].strip() == "h_x = h(x)"
@@ -58,7 +58,7 @@ def test_anf():
 
 def test_long():
   def f(x):
-    return some_very_long_name(some_other_long_name(x))  # noqa
+    return some_very_long_name(some_other_long_name(x))
 
   # If a function name is long, we use the LHS or return statement for the name
   # instead

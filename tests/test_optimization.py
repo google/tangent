@@ -31,7 +31,7 @@ def test_assignment_propagation():
 
 def test_dce():
   def f(x):
-    y = 2 * x  # noqa
+    y = 2 * x
     return x
 
   node = quoting.parse_function(f)
@@ -41,8 +41,8 @@ def test_dce():
 
 def test_fixed_point():
   def f(x):
-    y = g(x)  # noqa
-    z = h(y)  # noqa
+    y = g(x)
+    z = h(y)
     return x
 
   node = quoting.parse_function(f)

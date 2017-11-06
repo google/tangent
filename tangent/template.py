@@ -19,12 +19,12 @@ work. For simple templates nodes can be passed as well.
 
 """
 from __future__ import absolute_import
-import enum
+
 import types
+import enum
 
 import gast
 import six
-
 from tangent import annotations as anno
 from tangent import ast as ast_
 from tangent import create

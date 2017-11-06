@@ -12,13 +12,13 @@
 #      See the License for the specific language governing permissions and
 #      limitations under the License.
 """AST visiting and transformation patterns."""
+
 from __future__ import absolute_import
+
 from collections import deque
 from copy import copy
 
-
 import gast
-
 from tangent import annotations as anno
 from tangent import grammar
 

@@ -36,16 +36,15 @@ intermediate variables from the primal.
 
 """
 from __future__ import absolute_import
+
 import math
 import types
+
 import gast
 import numpy
-
 import tangent
 from tangent import tracing
 
-
-d = None  # Prevents flake8 errors
 
 # Means that a keyword argument will be filled in by the default of the actual
 # function
@@ -138,7 +137,7 @@ def dfor_(adjoint_body, i, pop, pop_target, target, _stack, op_id_iter,
           op_id_target):
   i = pop(_stack, op_id_iter)
   for _ in range(i):
-    target = pop_target(_stack, op_id_target)  # noqa
+    target = pop_target(_stack, op_id_target)
     adjoint_body
 
 

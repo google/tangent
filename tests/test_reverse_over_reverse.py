@@ -61,16 +61,5 @@ def test_reverse_over_reverse_ternary(func, optimized, a, b, c):
   _test_gradgrad_array(func, optimized, a, b, c)
 
 
-# TODO: The seed-gradient will have to match input, not be 1.0.
-#
-# if tfe.tf:
-#   def test_reverse_over_reverse_binary_tensor(func, t1, t2, optimized):
-#     tfe_utils.test_gradgrad_tensor(func, optimized, t1, t2)
-#
-#
-# def test_reverse_over_reverse_vector(func, optimized, x):
-#   _test_gradgrad_array(func, optimized, x)
-
-
 if __name__ == '__main__':
   assert not pytest.main([__file__, '--short'])

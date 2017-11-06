@@ -599,14 +599,6 @@ def iterpower_with_nested_def(a, n):
   return a
 
 
-# def recursive_iterpower(a, n):
-#     if n == 0:
-#         out = a * a
-#     else:
-#         out = recursive_iterpower(a*a, n-1)
-#     return out
-
-
 # ================================================
 # Subscripts
 # ================================================
@@ -642,7 +634,7 @@ def passthru_unpack(abc_packed_in_tuple):
 
 def cart2polar(a, b):
   r = np.sqrt(a**2.0 + b**2.0)
-  theta = np.arctan(b, a)  # I know, should be arctan2, just chill
+  theta = np.arctan(b, a)  # Should really be arctan2
   return r, theta
 
 

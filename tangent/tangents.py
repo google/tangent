@@ -34,16 +34,14 @@ Tangents have access to the inputs and outputs of the primal. They are expected
 to contain expressions for the derivative with respect to the output. They don't
 have access to any intermediate variables from the primal.
 """
-
 from __future__ import absolute_import
+
 import math
-import types
+
 import gast
 import numpy
 import tangent
 from tangent import grads
-
-d = None  # Prevents flake8 errors
 
 tangents = {}
 tangent_ = grads.create_register(tangents)

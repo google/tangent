@@ -29,7 +29,7 @@ def test_compile():
   assert inspect.getsource(f).split('\n')[0] == 'def f(x):'
 
   def f(x):
-    return y * 2  # noqa
+    return y * 2
 
   f = compile_.compile_function(quoting.parse_function(f), {'y': 3})
   assert f(2) == 6

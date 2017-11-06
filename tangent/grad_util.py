@@ -15,11 +15,9 @@
 from __future__ import absolute_import
 
 import inspect
-from types import ModuleType
 import gast
 import numpy
 import six
-
 from tangent import anf as anf_
 from tangent import annotate
 from tangent import ast as ast_
