@@ -36,36 +36,11 @@ Here's Tangent in action in the IPython console.
 
 ### Installation
 
-The easiest way to install is by cloning the git repo. Then from the root directory, use either of the methods listed below. We'll have pip and conda packages shortly.
+The easiest way to install Tangent is to use `pip`.
 
-Note: The commands below will by default install the CPU build for TensorFlow. To use the GPU build, use:
+    pip install tangent
 
-    pip install tf-nightly-gpu
-
-#### Conda
-
-    conda env create -f environment.yml
-    conda activate tangent
-
-#### PIP
-
-To install Tangent and its dependencies:
-
-    pip install -e .
-
-To install just the requirements:
-
-    pip install -r requirements.txt
-
-### Running tests
-
-Tests require pytest:
-
-    pip install pytest
-
-To run the tests:
-
-    python -m pytest --short tests
+We'll have a conda package soon.
 
 ## Automatic Differentiation
 
