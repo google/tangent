@@ -11,7 +11,6 @@
 #      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #      See the License for the specific language governing permissions and
 #      limitations under the License.
-# flake8: noqa
 """Several imports to flatten the Tangent namespace for end users."""
 from __future__ import absolute_import
 import functools
@@ -21,7 +20,6 @@ import gast
 from tangent import annotate
 from tangent import ast as ast_
 from tangent import compile as compile_
-
 from tangent.tracing import trace
 from tangent.tracing import trace_grad
 from tangent.utils import add_grad

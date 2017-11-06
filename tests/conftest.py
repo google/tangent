@@ -28,8 +28,8 @@ blacklisted = [
     'grad_of',
     '_trace_mul',
     '_nontrace_mul',
-    'active_subscript',  # TODO: blacklisted until 1.2 autograd release
-    'init_array_grad_maybe_active',  # TODO: blacklisted as well
+    'active_subscript',  # TODO: fix then remove from blacklist
+    'init_array_grad_maybe_active',  # TODO: fix then remove from blacklist
 ]
 
 funcs = [f for f in functions.__dict__.values() if callable(f)]

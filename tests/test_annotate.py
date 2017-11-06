@@ -29,7 +29,7 @@ def test_resolve():
   assert anno.getanno(node.body[0].body[0].value, 'func') == g
 
   def f(x):
-    return h(x)  # noqa
+    return h(x)
 
   node = quoting.parse_function(f)
   with pytest.raises(AttributeError):
@@ -38,7 +38,7 @@ def test_resolve():
 
 def test_unused():
   def f(x):
-    y = x * 2  # noqa
+    y = x * 2
     return x
 
   node = quoting.parse_function(f)

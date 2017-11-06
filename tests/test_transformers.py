@@ -40,7 +40,7 @@ def test_insert_block():
   def f(x):
     while True:
       y = x
-      z = y  # noqa
+      z = y
     return y
   node = quoting.parse_function(f)
 
@@ -61,7 +61,7 @@ def test_insert_top():
   def f(x):
     while True:
       y = x
-      z = y  # noqa
+      z = y
     return y
   node = quoting.parse_function(f)
 
@@ -82,7 +82,7 @@ def test_remove():
   def f(x):
     while True:
       y = x
-      z = y  # noqa
+      z = y
     return y
   node = quoting.parse_function(f)
 

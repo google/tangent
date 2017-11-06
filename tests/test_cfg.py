@@ -28,7 +28,7 @@ def f(x):
 
 def g(x):
   if x:
-    y = 2  # noqa
+    y = 2
   return x
 
 

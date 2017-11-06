@@ -18,8 +18,6 @@ from tangent import compile as compile_
 from tangent import quoting
 from tangent import template
 
-d = None  # Flake8 errors
-
 
 def _wrap(body):
   """Take a list of statements and wrap them in a function to compile."""

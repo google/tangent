@@ -24,10 +24,9 @@ from __future__ import division
 from copy import copy as native_copy
 import types
 
-import six
 import autograd
 import numpy
-
+import six
 from tangent import annotations as anno
 from tangent import quoting
 
