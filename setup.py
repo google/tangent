@@ -18,7 +18,7 @@ setup(
     url='https://github.com/google/tangent',
     license=lic,
     packages=find_packages(exclude=('tests')),
-    download_url='https://github.com/google/tangent/archive/0.1.0.tar.gz',
+    package_data={'':['README.md','LICENSE']},
     keywords=[
         'autodiff', 'automatic-differentiation', 'machine-learning',
         'deep-learning'
