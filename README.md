@@ -168,7 +168,7 @@ forward_df = tangent.grad(f, mode='forward')
 
 ## Hessian-Vector Products
 
-Although we won’t dig into the technical details, forward-mode is very useful when combined with reverse-mode to calculate efficient higher-order derivatives, particularly for Hessian-vector products (HVP) of NNs. This is useful in research applications, and usually very painful and slow to calculate. TensorFlow has 3rd-party support for forward-mode, as does Autograd.
+Although we won’t dig into the technical details, forward-mode is very useful when combined with reverse-mode to calculate efficient higher-order derivatives, particularly for Hessian-vector products (HVP) of NNs. This is useful in research applications, and usually very painful and slow to calculate. Autograd has native forward-mode support, while TensorFlow has 3rd-party support.
 
 To take higher-order derivatives, you can use any combination of forward- and reverse-mode autodiff in Tangent. This works because the code Tangent produces can also be fed back in as input. The autodiff literature recommends calculating HVPs in a “Forward-over-Reverse” style. This means first apply reverse mode autodiff to the function, and then apply forward mode to that.
 
