@@ -1,0 +1,14 @@
+sudo: false
+language: python
+python:
+  - 2.7
+  - 3.5
+  - 3.6
+install:
+  - pip install -e .
+  - pip install -r requirements.txt
+  - pip install pytest pytest-cov
+script:
+  - py.test --cov=coverage --short tests
+after_success:
+  - coveralls
