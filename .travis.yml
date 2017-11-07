@@ -1,10 +1,10 @@
+sudo: false
 language: python
 python:
   - 2.7
   - 3.3
   - 3.4
   - 3.6
-  - pypy
 install:
   - pip3 install -e .
   - pip install -r requirements.txt

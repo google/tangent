@@ -9,7 +9,7 @@ with open('LICENSE', encoding='utf-8') as f:
 
 setup(
     name='tangent',
-    version='0.1.0',
+    version='0.1.1',
     description=('Automatic differentiation using source code transformation '
                  'for Python'),
     long_description=readme,
