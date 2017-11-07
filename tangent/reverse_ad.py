@@ -39,6 +39,7 @@ from tangent import fixes
 from tangent import funcsigs
 from tangent import grads
 from tangent import naming
+from tangent import non_differentiable
 from tangent import quoting
 from tangent import template
 from tangent import tracing
@@ -667,7 +668,7 @@ class ReverseAD(object):
     # Find the function we are differentiating
     func = anno.getanno(node, 'func')
 
-    if func in grads.NON_DIFFERENTIABLE:
+    if func in non_differentiable.NON_DIFFERENTIABLE:
       return node, []
 
     if func == tracing.Traceable:

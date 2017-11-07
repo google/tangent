@@ -28,6 +28,7 @@ import autograd
 import numpy
 import six
 from tangent import annotations as anno
+from tangent import non_differentiable
 from tangent import quoting
 
 
@@ -515,6 +516,10 @@ def push_stack(stack, substack, op_id):
     stack.append((substack, op_id))
   else:
     stack.append(substack)
+
+
+non_differentiable.register_non_differentiable_functions(
+    init_grad, array_size, Stack)
 
 
 def insert_grad_of(var):
