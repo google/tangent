@@ -36,6 +36,7 @@ from tangent import errors
 from tangent import funcsigs
 from tangent import grads
 from tangent import naming
+from tangent import non_differentiable
 from tangent import quoting
 from tangent import tangents
 from tangent import template

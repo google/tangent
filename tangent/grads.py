@@ -50,15 +50,6 @@ from tangent import tracing
 # function
 DEFAULT = object()
 
-# Non-differentiable functions; not in the mathematical sense, but in the sense
-# of them providing zero gradient because they provide meta-information (shape)
-# do integer arithmetic, or are tensor constructors
-NON_DIFFERENTIABLE = set([
-    len,
-    numpy.shape, numpy.zeros, numpy.ones, numpy.zeros_like, numpy.ones_like,
-    tangent.init_grad, tangent.array_size, tangent.Stack,
-])
-
 # TODO: Avoid requiring non-differentiables to define @tangent_s.
 # All non-differentiable function need to create shadow zero-filled variables
 # in forward mode. Currently we achieve that by defining identity @tangent_
@@ -91,11 +82,6 @@ def get_module_functions(modules):
           attr, (types.BuiltinFunctionType, types.FunctionType, numpy.ufunc)):
         module_fns.add(attr)
   return module_fns
-
-
-def register_non_differentiable_functions(*funcs):
-  global NON_DIFFERENTIABLE
-  NON_DIFFERENTIABLE |= set(funcs)
 
 
 def create_register(dict_):
