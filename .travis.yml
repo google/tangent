@@ -9,6 +9,6 @@ install:
   - pip install -r requirements.txt
   - pip install pytest pytest-cov
 script:
-  - py.test --cov=coverage --short tests -v
+  - py.test --cov=coverage --short tests
 after_success:
   - coveralls
