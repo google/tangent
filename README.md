@@ -1,6 +1,9 @@
-# Tangent
+# Tangent 
 
-Tangent is a new, free, and open-source Python library for automatic differentiation.
+[![Build Status](https://travis-ci.org/google/tangent.svg?branch=master)](https://travis-ci.org/google/tangent)
+
+Tangent is a new, free, and open-source Python library for automatic differentiation.  
+
 
 Existing libraries implement automatic differentiation by tracing a program’s execution (at runtime, like PyTorch) or by staging out a dynamic data-flow graph and then differentiating the graph (ahead-of-time, like TensorFlow). In contrast, Tangent performs ahead-of-time autodiff on the Python source code itself, and produces Python source code as its output. Tangent fills a unique location in the space of machine learning tools.
 
