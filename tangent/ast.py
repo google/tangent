@@ -112,20 +112,20 @@ def append_args(node, node_list):
   return ArgAppend(node_list).visit(node)
 
 
-def is_grad_of_statement(node):
-  """Check whether a context manager calls `grad_of`.
+def is_insert_grad_of_statement(node):
+  """Check whether a context manager calls `insert_grad_of`.
 
   Args:
     node: The context manager node.
 
   Returns:
-    Whether or not this node contains `grad_of` calls.
+    Whether or not this node contains `insert_grad_of` calls.
 
   Raises:
-    ValueError: If the `grad_of` calls are mixed with other calls.
+    ValueError: If the `insert_grad_of` calls are mixed with other calls.
   """
   tangent_calls = [anno.getanno(item.context_expr, 'func', None)
-                   is utils.grad_of for item in node.items]
+                   is utils.insert_grad_of for item in node.items]
   if all(tangent_calls):
     return True
   elif any(tangent_calls):

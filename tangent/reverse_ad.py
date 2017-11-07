@@ -358,8 +358,8 @@ class ReverseAD(object):
     return primal, adjoint
 
   def visit_With(self, node):
-    """Deal with the special with grad_of(x) statement."""
-    if ast_.is_grad_of_statement(node):
+    """Deal with the special with insert_grad_of(x) statement."""
+    if ast_.is_insert_grad_of_statement(node):
       primal = []
       adjoint = node.body
       if isinstance(adjoint[0], gast.With):
