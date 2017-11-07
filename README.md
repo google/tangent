@@ -1,4 +1,4 @@
-# Tangent
+# Tangent [![Build Status](https://travis-ci.org/google/tangent.svg?branch=master)](https://travis-ci.org/google/tangent)
 
 Tangent is a new, free, and open-source Python library for automatic differentiation.
 
