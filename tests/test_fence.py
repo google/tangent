@@ -175,14 +175,6 @@ def test_ifexp():
   _assert_tangent_parse_error(f, 'Conditional')
 
 
-def test_extslice():
-
-  def f(x):
-    return x[0:1, 2]
-
-  _assert_tangent_parse_error(f, 'Extended Slices')
-
-
 def test_setcomp():
 
   def f(x):

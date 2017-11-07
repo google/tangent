@@ -754,3 +754,7 @@ def redefining_var_as_list(a):
 
 def nested_dict(p):
   return p['i']['j'] * p['i']['k']
+
+
+def extended_slice(x):
+  return np.sum(x[::2, np.newaxis])
