@@ -25,7 +25,7 @@ from __future__ import division
 import numpy as np
 
 import tangent
-from tangent import insert_grad_of
+from tangent import grad_of
 
 import tensorflow as tf
 
@@ -640,7 +640,7 @@ def cart2polar(a, b):
 
 def inlining_contextmanager(a):
   b = a * a
-  with insert_grad_of(a) as g:
+  with grad_of(a) as g:
     g = g * 0.9
   c = b * a
   return c

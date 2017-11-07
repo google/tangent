@@ -61,7 +61,7 @@ def clearanno(node):
 def getanno(node, key, default=None):
   annotations = getattr(node, ANNOTATION_FIELD, {})
   if key not in annotations and default is None:
-    raise KeyError
+    raise KeyError('Node "%s" has no annotation "%s"' % (node, key))
   return annotations.get(key, default)
 
 

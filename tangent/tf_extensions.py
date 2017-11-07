@@ -20,7 +20,7 @@ from tangent import tangents
 from tangent import utils
 from tangent.grads import adjoint
 from tangent.grads import DEFAULT
-from tangent.grads import register_non_differentiable_functions
+from tangent import non_differentiable
 from tangent.tangents import tangent_
 from tangent.utils import register_all_add_grad
 from tangent.utils import register_init_grad
@@ -44,7 +44,7 @@ def shape_as_list(t):
   return t.shape.as_list()
 
 
-register_non_differentiable_functions(
+non_differentiable.register_non_differentiable_functions(
     tf.shape, tf.to_float, tf.equal, tf.constant,
     tf.zeros, tf.ones, tf.zeros_like, tf.ones_like,
     size, shape_as_list, dtype)
@@ -309,6 +309,11 @@ def dtfmax_pool(y, x, sizes, strides, padding):
 #
 # Tangents
 #
+
+
+@tangent_(shape_as_list)
+def tshape_as_list(y, x):
+  d[y] = tangent.shape_as_list(d[x])
 
 
 @tangent_(tf.exp)

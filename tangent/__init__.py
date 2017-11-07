@@ -28,7 +28,7 @@ from tangent.utils import astype
 from tangent.utils import balanced_eq
 from tangent.utils import copy
 from tangent.utils import grad_dot
-from tangent.utils import insert_grad_of
+from tangent.utils import grad_of
 from tangent.utils import init_grad
 from tangent.utils import pop
 from tangent.utils import pop_stack
@@ -45,17 +45,17 @@ from tangent.tf_extensions import *
 
 
 class RemoveWith(gast.NodeTransformer):
-  """A transformer that removes `with insert_grad_of` statements."""
+  """A transformer that removes `with grad_of` statements."""
 
   def visit_With(self, node):
-    if ast_.is_insert_grad_of_statement(node):
+    if ast_.is_grad_of_statement(node):
       return None
     else:
       return node
 
 
 def tangent(f):
-  """A decorator which removes the `with insert_grad_of` statement.
+  """A decorator which removes the `with grad_of` statement.
 
   This allows the function to be called as usual.
 
@@ -63,7 +63,7 @@ def tangent(f):
     f: A function
 
   Returns:
-    A function with any `with insert_grad_of` context managers removed.
+    A function with any `with grad_of` context managers removed.
   """
   node = annotate.resolve_calls(f)
   RemoveWith().visit(node)

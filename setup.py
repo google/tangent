@@ -9,7 +9,7 @@ with open('LICENSE') as f:
 
 setup(
     name='tangent',
-    version='0.1.3',
+    version='0.1.0',
     description=('Automatic differentiation using source code transformation '
                  'for Python'),
     long_description=readme,
@@ -18,7 +18,7 @@ setup(
     url='https://github.com/google/tangent',
     license=lic,
     packages=find_packages(exclude=('tests')),
-    package_data={'':['README.md','LICENSE']},
+    download_url='https://github.com/google/tangent/archive/0.1.0.tar.gz',
     keywords=[
         'autodiff', 'automatic-differentiation', 'machine-learning',
         'deep-learning'

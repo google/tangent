@@ -28,6 +28,7 @@ import autograd
 import numpy
 import six
 from tangent import annotations as anno
+from tangent import non_differentiable
 from tangent import quoting
 
 
@@ -517,10 +518,14 @@ def push_stack(stack, substack, op_id):
     stack.append(substack)
 
 
-def insert_grad_of(var):
+non_differentiable.register_non_differentiable_functions(
+    init_grad, array_size, Stack)
+
+
+def grad_of(var):
   """The context manager that allows insertion of arbitrary adjoint code.
 
-  This function can be used as a context manager e.g. `with insert_grad_of(x) as dx`
+  This function can be used as a context manager e.g. `with grad_of(x) as dx`
   to write code that will be inserted in the adjoint while having access to the
   gradients of certain variables.
 
@@ -540,7 +545,7 @@ def insert_grad_of(var):
         decorator and the code is actually run.
   """
   raise ValueError('use the tangent decorator for functions containing '
-                   'the `with insert_grad_of` statement')
+                   'the `with grad_of` statement')
 
 
 def grad_dot(dy, x1, x2):

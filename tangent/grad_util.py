@@ -171,7 +171,7 @@ def grad(func,
         `preserve_result` is True, the function will also return the original
         result of `func`.
   """
-  # If the function had the with insert_grad_of statements removed, retrieve them
+  # If the function had the with grad_of statements removed, retrieve them
   func = getattr(func, 'tangent', func)
 
   # Take the gradient

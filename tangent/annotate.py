@@ -17,15 +17,14 @@ This file contains passes that walk the AST and attach annotations to various
 nodes.
 """
 from __future__ import absolute_import
-import builtins
 from collections import defaultdict
+import builtins
 
 import gast
 import six
-import autograd
 
-from tangent import tracing
 from tangent import annotations as anno
+from tangent import tracing
 from tangent import cfg
 from tangent import quoting
 from tangent import utils
@@ -57,7 +56,12 @@ class ResolveCalls(gast.NodeVisitor):
           return self.namespace[node.id]
         else:
           # TODO: we should detect when tracing is a fallback.
-          return getattr(builtins, node.id)
+          if hasattr(builtins, node.id):
+            return getattr(builtins, node.id)
+          else:
+            raise AttributeError(
+                'Failed to resolve name "%s" used by "%s".'% (
+                    node.id, self.func.__name__))
 
     func = resolve(node.func)
     # If the user has used the @tangent.trace decorator,

@@ -29,7 +29,7 @@ from tangent.errors import TangentParseError
 
 def validate(node, source):
   """Call this function to validate an AST."""
-  # TODO: leaving strict checking off to support insert_grad_of
+  # TODO: leaving strict checking off to support grad_of
   lf = LanguageFence(source, strict=False)
   lf.visit(node)
   return node

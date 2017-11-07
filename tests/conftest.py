@@ -25,7 +25,7 @@ blacklisted = [
     'cart2polar',
     'iterpower_with_nested_def',
     'fn_multiple_return',
-    'insert_grad_of',
+    'grad_of',
     '_trace_mul',
     '_nontrace_mul',
     'active_subscript',  # TODO: fix then remove from blacklist
