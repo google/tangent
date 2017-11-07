@@ -87,6 +87,58 @@ For loops require a little more bookkeeping. Tangent has to save the number of i
 
 ![SCT on Loops](docs/sct-ad-loop.gif "SCT on Loops")
 
+## Custom Gradients
+
+Tangent uses Python's built-in machinery to introspect and transform the _abstract syntax tree_ (AST) of parsed source code at runtime. For each piece of supported Python syntax, we have implemented a rule indicating how to rewrite an AST node into its backward pass equivalent, or "adjoint". We have defined adjoints for function calls to NumPy and TF Eager methods, as well as larger pieces of syntax, such as if-statements and for-loops. The adjoints are stored in function definitions that serve as "templates", or code macros. Another alternative, which we found too cumbersome, would be to use a templating engine like [Mustache](https://mustache.github.io/) and store adjoints as plain strings. Our templates also use a special syntax `d[x]` to refer to the derivative of a variable `x`.
+
+While differentiating a function, if Tangent encounters a function call, it first checks if it has a gradient registered for that function. If not, it tries to get the function source, and generate a derivative ahead-of-time. But, it's easy to register your own gradients. Here's a toy example of defining the gradient of `x^3`.
+
+```python
+import tangent
+from tangent.grads import adjoint
+
+def cube(x):
+  return x * x * x
+  
+# Register the gradient of cube with Tangent
+# NOTE! This is not a runnable function, but instead is a code template.
+# Tangent will replace the names of the variables `result` and `x` with whatever
+# is used in your containing function.
+@adjoint(cube)
+def dcube(result, x):
+  d[x] = d[result] * 3 * x * x
+  
+def f(val):
+    cubed_val = cube(val)
+    return cubed_val
+
+print(tangent.grad(f,verbose=1))
+```
+Should output something like:
+```python
+def dfdval(val, bcubed_val=1.0):
+    # Grad of: cubed_val = cube(val)
+    bval = bcubed_val * 3 * (val * val) # <<<< this is our inlined gradient
+    return bval
+```
+
+The signature for the custom gradient of some function
+
+```python
+result = orig_function(arg1,arg2)
+```
+is
+```python
+@adjoint(orig_function)
+def grad_orig_function(result, arg1, arg2):
+  d[arg1] = d[result]*...
+  d[arg2] = d[result]*...
+```
+The first argument to the template is always the result of the function call, followed by the function arguments, in order.
+Tangent captures the variable names of the result and arguments, and then will use them to unquote the gradient template at the appropriate place in the backward pass.
+
+Check out an [example gradient definition of a NumPy function](https://github.com/google/tangent/blob/6ee7fe31e876c7a68273aeb28ecf03aae42d970d/tangent/grads.py#L261-L263) and [of a TF eager function](https://github.com/google/tangent/blob/6ee7fe31e876c7a68273aeb28ecf03aae42d970d/tangent/tf_extensions.py#L244-L247). Also, [see the docstring in `grads.py` for more info](https://github.com/google/tangent/blob/6ee7fe31e876c7a68273aeb28ecf03aae42d970d/tangent/grads.py#L14-L36).
+
 ## Debugging
 
 Because Tangent auto-generates derivative code you can read, you can also easily debug your backward pass. For instance, your NN might be outputting NaNs during training, and you want to find out where the NaNs are being generated in your model. Just insert a breakpoint (e.g., pdb.set_trace()) at the end of your forward pass.
