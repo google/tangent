@@ -107,7 +107,7 @@ def f(x):
 
 ## Derivative Surgery
 
-You can use the `insert_grad_of` feature to do more than debugging and logging. Some NN architectures benefit from tricks that directly manipulate the backward pass. For example, recurrent neural networks (RNNs) suffer from the “exploding gradient” problem, where gradients grow exponentially. This prevents the model from training properly. A typical solution is to force the derivatives inside of an RNN to not exceed a certain value by directly clipping them. We can implement this with `insert_grad_of`.
+You can use the `insert_grad_of` feature to do more than debugging and logging. Some NN architectures benefit from tricks that directly manipulate the backward pass. For example, recurrent neural networks (RNNs) suffer from the "exploding gradient" problem, where gradients grow exponentially. This prevents the model from training properly. A typical solution is to force the derivatives inside of an RNN to not exceed a certain value by directly clipping them. We can implement this with `insert_grad_of`.
 
 ```python
 
@@ -145,7 +145,7 @@ forward_df = tangent.grad(f, mode='forward')
 
 Although we won’t dig into the technical details, forward-mode is very useful when combined with reverse-mode to calculate efficient higher-order derivatives, particularly for Hessian-vector products (HVP) of NNs. This is useful in research applications, and usually very painful and slow to calculate. Autograd has native forward-mode support, while TensorFlow has 3rd-party support.
 
-To take higher-order derivatives, you can use any combination of forward- and reverse-mode autodiff in Tangent. This works because the code Tangent produces can also be fed back in as input. The autodiff literature recommends calculating HVPs in a “Forward-over-Reverse” style. This means first apply reverse mode autodiff to the function, and then apply forward mode to that.
+To take higher-order derivatives, you can use any combination of forward- and reverse-mode autodiff in Tangent. This works because the code Tangent produces can also be fed back in as input. The autodiff literature recommends calculating HVPs in a "Forward-over-Reverse" style. This means first apply reverse mode autodiff to the function, and then apply forward mode to that.
 
 ```python
 
