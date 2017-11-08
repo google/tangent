@@ -164,6 +164,24 @@ def unreduce(array, shape, axis, keepdims):
   return unreducer(array, shape, axis, keepdims)
 
 
+def unreduce_like(array, original_array, axis, keepdims):
+  """Reverse summing over a dimension.
+
+  Args:
+    array: The array that was reduced.
+    original_array: An array whose shape to unreduce to.
+    axis: The axis or axes that were summed.
+    keepdims: Whether these axes were kept as singleton axes.
+
+  Returns:
+    An array with axes broadcast to match the shape of the original array.
+  """
+  atype = type(array)
+  unreducer = unreducers[atype]
+  shape = shape_functions[atype]
+  return unreducer(array, shape(original_array), axis, keepdims)
+
+
 def unreduce_array(array, shape, axis, keepdims):
   """Reverse summing over a dimension, NumPy implementation.
 
@@ -184,6 +202,33 @@ def unreduce_array(array, shape, axis, keepdims):
     for ax in sorted(axis):
       array = numpy.expand_dims(array, ax)
   return numpy.broadcast_to(array, shape)
+
+
+# The values are unary functions.
+shape_functions = {
+    numpy.ndarray: numpy.shape,
+    numpy.float32: numpy.shape,
+    numpy.float64: numpy.shape,
+    float: lambda _: (),
+    int: lambda _: (),
+    bool: lambda _: (),
+}
+
+
+def register_shape_function(t, shape_function):
+  """Register a new shape function.
+
+  Shape functions extract the shape of an array-like object.
+
+  Args:
+    t: A Python type object. The data type supported by the
+      unreducer.
+    shape_function: A unary function that returns a list or tuple with zero
+      or more integers representing the dimensions of `t`.
+  """
+  assert t not in shape_functions
+  shape_functions[t] = shape_function
+
 
 # The values are functions with signature like `unreduce_array`
 unreducers = {

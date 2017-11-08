@@ -80,7 +80,14 @@ def to_source(node, indentation=' ' * 4):
 
 def parse_function(fn):
   """Get the source of a function and return its AST."""
-  return parse_string(inspect.getsource(fn))
+  try:
+    return parse_string(inspect.getsource(fn))
+  except (IOError, OSError) as e:
+    raise ValueError(
+        'Cannot differentiate function: %s. Tangent must be able to access the '
+        'source code of the function. Functions defined in a Python '
+        'interpreter and functions backed by C extension modules do not '
+        'have accessible source code.' % e)
 
 
 def parse_string(src):

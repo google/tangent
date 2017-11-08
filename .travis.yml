@@ -12,3 +12,7 @@ script:
   - py.test --cov=coverage --short tests
 after_success:
   - coveralls
+notifications:
+  email:
+    on_success: change
+    on_failure: change

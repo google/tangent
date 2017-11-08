@@ -71,7 +71,6 @@ def _test_hvp(func, optimized):
 
 
 def _test_tf_hvp(func, optimized):
-  np.random.seed(0)
   a = tf.random_normal(shape=(300,))
   v = tf.reshape(a, shape=(-1,))
 
@@ -80,7 +79,6 @@ def _test_tf_hvp(func, optimized):
     for mode2 in modes:
       if mode1 == mode2 == 'forward':
         continue
-      print(mode1, mode2)
       df = tangent.grad(func, mode=mode1, motion='joint', optimized=optimized)
       ddf = tangent.grad(df, mode=mode2, motion='joint', optimized=optimized)
       dx = ddf(a, tf.constant(1.0), v)
