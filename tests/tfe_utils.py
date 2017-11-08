@@ -136,7 +136,7 @@ def test_forward_tensor(func, wrt, *args):
   # TODO: Should results really be that far off?
   utils.assert_result_matches_reference(
       tangent_func, reference_func, backup_reference_func,
-      tolerance=1e-5)
+      tolerance=1e-4)
 
 
 def test_gradgrad_tensor(func, optimized, *args):
