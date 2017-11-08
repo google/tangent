@@ -21,8 +21,7 @@ import autograd.numpy as ag_np
 import numpy as np
 import tangent
 
-# Hack Autograd's NumPy implementation that may be missing the definition
-# for _NoValue.
+# Autograd's NumPy implementation may be missing the definition for _NoValue.
 if not hasattr(ag_np, '_NoValue'):
   ag_np._NoValue = np._NoValue  # pylint: disable=protected-access
 
