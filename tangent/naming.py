@@ -266,6 +266,9 @@ class Namer(object):
     return ''.join(self._name(i) if i else ''
                    for i in (node.lower, node.upper, node.step))
 
+  def name_ExtSlice(self, node):
+    return '_'.join(self._name(d) for d in node.dims)
+
   def name_Num(self, node):
     num_str = str(node.n)
     num_str = num_str.replace('.', '_')

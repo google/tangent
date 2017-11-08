@@ -21,8 +21,7 @@ import autograd.numpy as ag_np
 import numpy as np
 import tangent
 
-# Hack Autograd's NumPy implementation that may be missing the definition
-# for _NoValue.
+# Autograd's NumPy implementation may be missing the definition for _NoValue.
 if not hasattr(ag_np, '_NoValue'):
   ag_np._NoValue = np._NoValue  # pylint: disable=protected-access
 
@@ -43,7 +42,7 @@ def _assert_allclose(a, b, tol=1e-5):
     try:
       a = np.nan_to_num(a)
       b = np.nan_to_num(b)
-      assert np.allclose(a, b, tol), ('Expected: %s\nGot: %s' % (a, b))
+      assert np.allclose(a, b, tol), ('Expected: %s\nGot: %s' % (b, a))
     except TypeError:
       raise TypeError('Could not compare values %s and %s' % (a, b))
 

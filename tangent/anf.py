@@ -103,28 +103,40 @@ class ANF(transformers.TreeTransformer):
     self.namer.target = None
     return node
 
+  def trivialize_slice(self, node):
+    if isinstance(node, gast.Slice):
+      name = self.namer.name(node)
+      target = gast.Name(id=name, ctx=gast.Store(), annotation=None)
+      stmt = gast.Assign(targets=[target], value=None)
+      self.prepend(stmt)
+      stmt.value = gast.Call(
+          func=gast.Name(id='slice', ctx=gast.Load(), annotation=None),
+          args=[
+              self.trivialize(arg) if arg else
+              gast.Name(id='None', ctx=gast.Load(), annotation=None)
+              for arg in [node.lower, node.upper,
+                          node.step]],
+          keywords=[])
+      return gast.Name(id=name, ctx=gast.Load(), annotation=None)
+    elif isinstance(node, gast.ExtSlice):
+      name = self.namer.name(node)
+      target = gast.Name(id=name, ctx=gast.Store(), annotation=None)
+      stmt = gast.Assign(targets=[target], value=None)
+      self.prepend(stmt)
+      dim_names = [self.trivialize_slice(s).id for s in node.dims]
+      stmt.value = gast.Tuple(elts=[
+          gast.Name(id=n, ctx=gast.Load(), annotation=None)
+          for n in dim_names], ctx=gast.Load())
+      return gast.Name(id=name, ctx=gast.Load(), annotation=None)
+    elif isinstance(node, gast.Index):
+      return self.trivialize(node.value)
+    else:
+      raise ValueError(node)
+
   def visit_Subscript(self, node):
     if self.trivializing:
       node.value = self.trivialize(node.value)
-      if isinstance(node.slice, gast.Index):
-        node.slice.value = self.trivialize(node.slice.value)
-      elif isinstance(node.slice, gast.Slice):
-        name = self.namer.name(node.slice)
-        target = gast.Name(id=name, ctx=gast.Store(), annotation=None)
-        stmt = gast.Assign(targets=[target], value=None)
-        self.prepend(stmt)
-        stmt.value = gast.Call(
-            func=gast.Name(id='slice', ctx=gast.Load(), annotation=None),
-            args=[
-                self.trivialize(arg) if arg else
-                gast.Name(id='None', ctx=gast.Load(), annotation=None)
-                for arg in [node.slice.lower, node.slice.upper,
-                            node.slice.step]],
-            keywords=[])
-        node.slice = gast.Index(value=gast.Name(id=name, ctx=gast.Load(),
-                                                annotation=None))
-      else:
-        raise ValueError
+      node.slice = gast.Index(value=self.trivialize_slice(node.slice))
     return node
 
   def visit_Tuple(self, node):
