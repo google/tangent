@@ -304,23 +304,23 @@ def maximum(ans, x, y):
 
 
 @adjoint(tangent.unreduce)
-def unreduce(y, x, shape, axis, keepdims):
+def aunreduce(y, x, shape, axis, keepdims):
   d[x] = tangent.unbroadcast(d[y], x)
 
 
 @adjoint(tangent.unbroadcast)
-def unbroadcast(y, array, shape):
-  d[array] = tangent.unreduce(d[y], numpy.shape(array), None, False)
+def aunbroadcast(y, x, shape):
+  d[x] = tangent.unreduce_like(d[y], x, None, False)
 
 
 @adjoint(tangent.add_grad)
-def add_grad(z, left, right):
+def aadd_grad(z, left, right):
   d[left] = tangent.unbroadcast(d[z], left)
   d[right] = tangent.unbroadcast(d[z], right)
 
 
 @adjoint(tangent.astype)
-def astype(z, array, y):
+def aastype(z, array, y):
   d[array] = tangent.astype(d[z], array)
 
 

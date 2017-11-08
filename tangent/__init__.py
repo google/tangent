@@ -28,8 +28,8 @@ from tangent.utils import astype
 from tangent.utils import balanced_eq
 from tangent.utils import copy
 from tangent.utils import grad_dot
-from tangent.utils import insert_grad_of
 from tangent.utils import init_grad
+from tangent.utils import insert_grad_of
 from tangent.utils import pop
 from tangent.utils import pop_stack
 from tangent.utils import push
@@ -37,6 +37,7 @@ from tangent.utils import push_stack
 from tangent.utils import Stack
 from tangent.utils import unbroadcast
 from tangent.utils import unreduce
+from tangent.utils import unreduce_like
 
 # Imported last to avoid circular imports
 from tangent.grad_util import grad

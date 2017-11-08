@@ -16,14 +16,15 @@ from __future__ import absolute_import
 
 import numpy as np
 from tangent import grads
+from tangent import non_differentiable
 from tangent import tangents
 from tangent import utils
 from tangent.grads import adjoint
 from tangent.grads import DEFAULT
-from tangent import non_differentiable
 from tangent.tangents import tangent_
 from tangent.utils import register_all_add_grad
 from tangent.utils import register_init_grad
+from tangent.utils import register_shape_function
 from tangent.utils import register_unbroadcast
 from tangent.utils import register_unreduce
 import tensorflow as tf
@@ -42,6 +43,9 @@ def dtype(t):
 
 def shape_as_list(t):
   return t.shape.as_list()
+
+register_shape_function(ops.EagerTensor, shape_as_list)
+register_shape_function(resource_variable_ops.ResourceVariable, shape_as_list)
 
 
 non_differentiable.register_non_differentiable_functions(
@@ -210,6 +214,7 @@ def dtfreshape(y, x, shape):
 
 @adjoint(tf.reduce_sum)
 def dtfreduce_sum(y, x, axis=DEFAULT, keep_dims=DEFAULT):
+  # TODO: We may be able to assume unreduce_tensor works throughout.
   d[x] = tangent.unreduce(d[y], tangent.shape_as_list(x), axis, keep_dims)
 
 
@@ -226,7 +231,7 @@ def dtfreduce_max(y, x, axis=DEFAULT, keep_dims=DEFAULT):
       tf.equal(
           tangent.unreduce(y, tangent.shape_as_list(x), axis, keep_dims), x))
   d[x] = tf.multiply(
-      tangent.unreduce(d[y], tangent.shape_as_list(x), axis, keep_dims), mask),
+      tangent.unreduce(d[y], tangent.shape_as_list(x), axis, keep_dims), mask)
 
 
 @adjoint(tf.add)
