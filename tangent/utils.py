@@ -332,7 +332,7 @@ class ZeroGradient(object):
     return self._like
 
   def instantiate(self):
-    return grad_initializers[type(self._like)](like)
+    return grad_initializers[type(self._like)](self._like)
 
 
 def register_init_grad(t, init_grad_function):
