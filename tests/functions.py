@@ -42,6 +42,10 @@ def sum_(x):
   return np.sum(x)
 
 
+def cast_sum_(x):
+  return np.sum(np.array(x))
+
+
 def overwrite_call(x):
   x = np.sum(x)
   x = x * x

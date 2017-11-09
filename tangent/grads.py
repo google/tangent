@@ -297,6 +297,10 @@ def maximum(ans, x, y):
   d[x] = d[ans] * tangent.balanced_eq(x, ans, y)
   d[y] = d[ans] * tangent.balanced_eq(y, ans, x)
 
+@adjoint(numpy.array)
+def aarray(ans,x):
+  d[x] = tangent.astype(d[ans],x)
+
 
 #
 # Tangent adjoints

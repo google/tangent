@@ -240,6 +240,10 @@ def trollaxis(z, a, axis, start=grads.DEFAULT):
 def tshape(z, x):
   d[z] = numpy.shape(d[x])
 
+@tangent_(numpy.array)
+def tarray(z, x):
+  d[z] = numpy.array(d[x])
+
 
 #
 # Tangent tangents
