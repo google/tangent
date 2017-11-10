@@ -103,4 +103,8 @@ def pytest_generate_tests(metafunc):
   if 'x' in metafunc.fixturenames:
     metafunc.parametrize('x', vectors)
 
+  matrices = [np.random.randn(i) for i in (((3, 3),) if short else ((1, 1), (5, 5)))]
+  if 'm' in metafunc.fixturenames:
+    metafunc.parametrize('m', matrices)
+
   tfe_utils.register_parametrizations(metafunc, short)
