@@ -312,13 +312,6 @@ def adet(z, x):
   d[x] = d[z] * numpy.transpose(adjugate)
 
 
-@adjoint(numpy.linalg.inv)
-def ainv(z, x):
-  """\frac{\partial(\bf{X}^{-1})}{\partial \bf{X}} Implements Eq (60) in: http://www2.imm.dtu.dk/pubdb/views/edoc_download.php/3274/pdf/imm3274.pdf
-  """
-  d[x] = d[z] * numpy.einsum('ki,jl->kl', -z, z)
-
-
 #
 # Tangent adjoints
 #

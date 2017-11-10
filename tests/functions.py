@@ -404,10 +404,6 @@ def logistic_regression(input, label, W, b):
   return loss
 
 
-def inv(sqm):
-  return np.linalg.inv(sqm)
-
-
 def det(sqm):
   return np.linalg.det(sqm)
 
