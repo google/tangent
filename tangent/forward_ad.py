@@ -260,22 +260,14 @@ class ForwardAD(transformers.TreeTransformer):
     sig = sig.replace(parameters=list(sig.parameters.values())[1:])
     kwargs = dict((keyword.arg, keyword.value) for keyword in node.keywords)
     bound_args = sig.bind(*node.args, **kwargs)
-    bound_args.apply_defaults()
 
-    # If any keyword arguments weren't passed, we fill them using the
-    # defaults of the original function
-    if grads.DEFAULT in bound_args.arguments.values():
-      # Build a mapping from names to defaults
-      args = quoting.parse_function(func).body[0].args
-      defaults = {}
-      for arg, default in zip(*map(reversed, [args.args, args.defaults])):
-        defaults[arg.id] = default
-      for arg, default in zip(args.kwonlyargs, args.kw_defaults):
-        if default is not None:
-          defaults[arg.id] = default
-      for name, value in bound_args.arguments.items():
-        if value is grads.DEFAULT:
-          bound_args.arguments[name] = defaults[name]
+    # Fill in any missing kwargs with the defaults from the template
+    args = quoting.parse_function(template_).body[0].args
+    kwargs = dict(zip(*map(reversed, [args.args, args.defaults])))
+    kwargs.update(dict(zip(args.kwonlyargs, args.kw_defaults)))
+    for arg, val in kwargs.items():
+      if arg.id not in bound_args.arguments:
+        bound_args.arguments[arg.id] = val
 
     # Let's fill in the template. The first argument is the output, which
     # was stored in a temporary variable

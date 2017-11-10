@@ -25,10 +25,6 @@ Templates do not support use of `**kwargs`.
 If a keyword argument isn't present in the adjoint, it means that Tangent
 doesn't support it, and an error will be raised if it appears in user code.
 
-Keyword arguments that are supported should always have the default value
-`DEFAULT`, which means that they will be passed the default value of the
-original function.
-
 Adjoints have access to the inputs of the primal, output of the primal, and
 gradients with respect to the output. They are expected to contain expressions
 for the gradient with respect to the input. They don't have access to any
@@ -45,10 +41,6 @@ import numpy
 import tangent
 from tangent import tracing
 
-
-# Means that a keyword argument will be filled in by the default of the actual
-# function
-DEFAULT = object()
 
 # TODO: Avoid requiring non-differentiables to define @tangent_s.
 # All non-differentiable function need to create shadow zero-filled variables
@@ -300,13 +292,13 @@ def broadcast_arrays(ys, *args):
 
 
 @adjoint(numpy.sum)
-def sum(y, x, axis=DEFAULT, dtype=DEFAULT, keepdims=DEFAULT):
+def sum(y, x, axis=None, dtype=None, keepdims=False):
   d[x] = tangent.astype(tangent.unreduce(d[y], numpy.shape(x),
                                          axis, keepdims), x)
 
 
 @adjoint(numpy.mean)
-def mean(y, x, axis=DEFAULT, dtype=DEFAULT, keepdims=DEFAULT):
+def mean(y, x, axis=None, dtype=None, keepdims=False):
   n = tangent.astype(tangent.array_size(x, axis), x)
   d[x] = tangent.astype(tangent.unreduce(d[y], numpy.shape(x),
                                          axis, keepdims), x) / n
@@ -317,11 +309,12 @@ def maximum(ans, x, y):
   d[x] = d[ans] * tangent.balanced_eq(x, ans, y)
   d[y] = d[ans] * tangent.balanced_eq(y, ans, x)
 
+
 @adjoint(numpy.array)
 def aarray(ans,x):
   d[x] = tangent.astype(d[ans],x)
 
-  
+
 @adjoint(numpy.linalg.det)
 def adet(z, x):
   """d|A|/dA = adj(A).T
