@@ -310,6 +310,17 @@ def adet(z, x):
   """
   adjugate = np.linalg.det(x) * np.linalg.pinv(x)
   d[x] = adjugate.T
+  
+
+@adjoint(numpy.linalg.inv)
+def ainv(z, x):
+  """
+  \frac{\partial(\bf{X}^{-1})}{\partial \bf{X}}
+  Implements Eq (60) in:
+  http://www2.imm.dtu.dk/pubdb/views/edoc_download.php/3274/pdf/imm3274.pdf
+  """
+  d[x] = np.einsum('ki,jl->kl', -z, z)
+    
 #
 # Tangent adjoints
 #
