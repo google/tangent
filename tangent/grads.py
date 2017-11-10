@@ -309,18 +309,16 @@ def adet(z, x):
   See  Jacobi's formula: https://en.wikipedia.org/wiki/Jacobi%27s_formula
   """
   adjugate = numpy.linalg.det(x) * numpy.linalg.pinv(x)
-  d[x] = numpy.transpose(adjugate)
+  d[x] = d[z] * numpy.transpose(adjugate)
 
 
 @adjoint(numpy.linalg.inv)
 def ainv(z, x):
+  """\frac{\partial(\bf{X}^{-1})}{\partial \bf{X}} Implements Eq (60) in: http://www2.imm.dtu.dk/pubdb/views/edoc_download.php/3274/pdf/imm3274.pdf
   """
-  \frac{\partial(\bf{X}^{-1})}{\partial \bf{X}}
-  Implements Eq (60) in:
-  http://www2.imm.dtu.dk/pubdb/views/edoc_download.php/3274/pdf/imm3274.pdf
-  """
-  d[x] = numpy.einsum('ki,jl->kl', -z, z)
-    
+  d[x] = d[z] * numpy.einsum('ki,jl->kl', -z, z)
+
+
 #
 # Tangent adjoints
 #
