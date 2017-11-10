@@ -309,8 +309,8 @@ def adet(z, x):
   See  Jacobi's formula: https://en.wikipedia.org/wiki/Jacobi%27s_formula
   """
   adjugate = numpy.linalg.det(x) * numpy.linalg.pinv(x)
-  d[x] = adjugate.T
-  
+  d[x] = numpy.transpose(adjugate)
+
 
 @adjoint(numpy.linalg.inv)
 def ainv(z, x):
