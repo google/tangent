@@ -308,7 +308,7 @@ def adet(z, x):
 
   See  Jacobi's formula: https://en.wikipedia.org/wiki/Jacobi%27s_formula
   """
-  adjugate = np.linalg.det(x) * np.linalg.pinv(x)
+  adjugate = numpy.linalg.det(x) * numpy.linalg.pinv(x)
   d[x] = adjugate.T
   
 
@@ -319,7 +319,7 @@ def ainv(z, x):
   Implements Eq (60) in:
   http://www2.imm.dtu.dk/pubdb/views/edoc_download.php/3274/pdf/imm3274.pdf
   """
-  d[x] = np.einsum('ki,jl->kl', -z, z)
+  d[x] = numpy.einsum('ki,jl->kl', -z, z)
     
 #
 # Tangent adjoints
