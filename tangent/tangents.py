@@ -26,10 +26,6 @@ If a keyword argument isn't present in the tangent compound statements, it means
 that Tangent doesn't support it, and an error will be raised if it appears in
 user code.
 
-Keyword arguments that are supported should always have the default value
-`DEFAULT`, which means that they will be passed the default value of the
-original function.
-
 Tangents have access to the inputs and outputs of the primal. They are expected
 to contain expressions for the derivative with respect to the output. They don't
 have access to any intermediate variables from the primal.
@@ -206,13 +202,13 @@ def ttranspose(z, x):
 
 
 @tangent_(numpy.sum)
-def tsum(y, x, axis=grads.DEFAULT, dtype=grads.DEFAULT, keepdims=grads.DEFAULT):
+def tsum(y, x, axis=None, dtype=None, keepdims=False):
   d[y] = numpy.sum(d[x], axis=axis, dtype=dtype, keepdims=keepdims)
 
 
 @tangent_(numpy.mean)
 def tmean(
-    y, x, axis=grads.DEFAULT, dtype=grads.DEFAULT, keepdims=grads.DEFAULT):
+    y, x, axis=None, dtype=None, keepdims=False):
   d[y] = numpy.mean(d[x], axis=axis, dtype=dtype, keepdims=keepdims)
 
 
@@ -232,13 +228,14 @@ def tndim(z, x):
 
 
 @tangent_(numpy.rollaxis)
-def trollaxis(z, a, axis, start=grads.DEFAULT):
+def trollaxis(z, a, axis, start=0):
   d[z] = numpy.rollaxis(d[a], axis, start)
 
 
 @tangent_(numpy.shape)
 def tshape(z, x):
   d[z] = numpy.shape(d[x])
+
 
 @tangent_(numpy.array)
 def tarray(z, x):
@@ -256,7 +253,7 @@ def tadd_grad(z, x, y):
 
 
 @tangent_(tangent.init_grad)
-def tinit_grad(z, x, allow_lazy_initializer=grads.DEFAULT):
+def tinit_grad(z, x, allow_lazy_initializer=False):
   d[z] = tangent.init_grad(d[x], allow_lazy_initializer=False)
 
 

@@ -24,9 +24,9 @@ import gast
 import six
 
 from tangent import annotations as anno
-from tangent import tracing
 from tangent import cfg
 from tangent import quoting
+from tangent import tracing
 from tangent import utils
 
 
