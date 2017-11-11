@@ -56,7 +56,7 @@ def tanh(a):
   return np.tanh(a)
 
 
-def I_assign(a):
+def identity_assign(a):
   b = a
   return b
 
@@ -392,7 +392,9 @@ def numpy_exp2(a):
 
 
 def numpy_sqrt(a):
-  return np.sqrt(a)
+  if a >= 0:
+    return np.sqrt(a)
+  return np.sqrt(-a)
 
 
 def numpy_cos(a):
