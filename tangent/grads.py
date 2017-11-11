@@ -209,14 +209,14 @@ def uadd(y, x):
 #
 
 
-@adjoint(numpy.tanh)
-def tanh(y, x):
-  d[x] = d[y] * (1.0 - (y * y))
-
-
 @adjoint(numpy.log)
 def log(y, x):
   d[x] = d[y] / x
+
+
+@adjoint(numpy.cos)
+def cos(y, x):
+  d[x] = -d[y] * numpy.sin(x)
 
 
 @adjoint(numpy.sin)
@@ -224,9 +224,9 @@ def sin(y, x):
   d[x] = d[y] * numpy.cos(x)
 
 
-@adjoint(numpy.cos)
-def cos(y, x):
-  d[x] = -d[y] * numpy.sin(x)
+@adjoint(numpy.tan)
+def tan(y, x):
+  d[x] = d[y] / numpy.cos(x) ** 2
 
 
 @adjoint(numpy.cosh)
@@ -237,6 +237,26 @@ def cosh(y, x):
 @adjoint(numpy.sinh)
 def sinh(y, x):
   d[x] = d[y] * numpy.cosh(x)
+
+
+@adjoint(numpy.tanh)
+def tanh(y, x):
+  d[x] = d[y] * (1.0 - (y * y))
+
+
+@adjoint(numpy.arccos)
+def arccos(y, x):
+  d[x] = -d[y] / numpy.sqrt(1 - x * x)
+
+
+@adjoint(numpy.arcsin)
+def arcsin(y, x):
+  d[x] = d[y] / numpy.sqrt(1 - x * x)
+
+
+@adjoint(numpy.arctan)
+def arctan(y, x):
+  d[x] = d[y] / (1 + x * x)
 
 
 @adjoint(numpy.exp)
