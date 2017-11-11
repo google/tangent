@@ -24,7 +24,7 @@ setup(
         'deep-learning'
     ],
     install_requires=[
-        'astor>=0.6',
+        'astor==0.6',
         'autograd>=1.2',
         'enum34',
         'future',
