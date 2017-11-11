@@ -136,19 +136,19 @@ def tlist(z, x):
 #
 
 
-@tangent_(numpy.sin)
-def tsin(z, x):
-  d[z] = d[x] * numpy.cos(x)
-
-
 @tangent_(numpy.cos)
 def tcos(z, x):
   d[z] = -d[x] * numpy.sin(x)
 
 
-@tangent_(numpy.tanh)
-def ttanh(z, x):
-  d[z] = d[x] / numpy.cosh(x)**2.0
+@tangent_(numpy.sin)
+def tsin(z, x):
+  d[z] = d[x] * numpy.cos(x)
+
+
+@tangent_(numpy.tan)
+def ttan(z, x):
+  d[z] = d[x] / numpy.cos(x) ** 2.0
 
 
 @tangent_(numpy.cosh)
@@ -159,6 +159,26 @@ def tcosh(z, x):
 @tangent_(numpy.sinh)
 def tsinh(z, x):
   d[z] = d[x] * numpy.cosh(x)
+
+
+@tangent_(numpy.tanh)
+def ttanh(z, x):
+  d[z] = d[x] / numpy.cosh(x)**2.0
+
+
+@tangent_(numpy.arccos)
+def tarccos(z, x):
+  d[z] = -d[x] / numpy.sqrt(1.0 - x * x)
+
+
+@tangent_(numpy.arcsin)
+def tarcsin(z, x):
+  d[z] = d[x] / numpy.sqrt(1.0 - x * x)
+
+
+@tangent_(numpy.arctan)
+def tarctan(z, x):
+  d[z] = d[x] / (1.0 + x * x)
 
 
 @tangent_(numpy.exp)

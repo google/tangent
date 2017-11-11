@@ -218,7 +218,7 @@ def sin(y, x):
 
 @adjoint(numpy.tan)
 def tan(y, x):
-  d[x] = d[y] / numpy.cos(x) ** 2
+  d[x] = d[y] / numpy.cos(x) ** 2.0
 
 
 @adjoint(numpy.cosh)
@@ -238,17 +238,17 @@ def tanh(y, x):
 
 @adjoint(numpy.arccos)
 def arccos(y, x):
-  d[x] = -d[y] / numpy.sqrt(1 - x * x)
+  d[x] = -d[y] / numpy.sqrt(1.0 - x * x)
 
 
 @adjoint(numpy.arcsin)
 def arcsin(y, x):
-  d[x] = d[y] / numpy.sqrt(1 - x * x)
+  d[x] = d[y] / numpy.sqrt(1.0 - x * x)
 
 
 @adjoint(numpy.arctan)
 def arctan(y, x):
-  d[x] = d[y] / (1 + x * x)
+  d[x] = d[y] / (1.0 + x * x)
 
 
 @adjoint(numpy.exp)
