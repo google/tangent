@@ -390,8 +390,46 @@ def numpy_exp(a):
 def numpy_exp2(a):
   return np.exp(np.exp(a))
 
+
 def numpy_sqrt(a):
   return np.sqrt(a)
+
+
+def numpy_cos(a):
+  return np.cos(a)
+
+
+def numpy_sin(a):
+  return np.sin(a)
+
+
+def numpy_tan(a):
+  return np.tan(a)
+
+
+def numpy_cosh(a):
+  return np.cosh(a)
+
+
+def numpy_sinh(a):
+  return np.sinh(a)
+
+
+def numpy_tanh(a):
+  return np.tanh(a)
+
+
+def numpy_arccos(a):
+  return np.arccos(a)
+
+
+def numpy_arcsin(a):
+  return np.arcsin(a)
+
+
+def numpy_arctan(a):
+  return np.arctan(a)
+
 
 # Label is 0 or 1
 
