@@ -63,8 +63,9 @@ def test_deriv_binary_tensor(func, t1, t2):
   if any(n in func.__name__ for n in ('tfe_squared_difference',)):
     utils.assert_forward_not_implemented(func, (0,))
     return
-  tfe_utils.test_forward_tensor(func, (0,), t1, t2)
-  tfe_utils.test_forward_tensor(func, (1,), t1, t2)
+  if t1.shape == t2.shape:
+    tfe_utils.test_forward_tensor(func, (0,), t1, t2)
+    tfe_utils.test_forward_tensor(func, (1,), t1, t2)
 
 
 def test_deriv_image(func, timage, tkernel, conv2dstrides):
