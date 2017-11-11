@@ -56,7 +56,7 @@ def tanh(a):
   return np.tanh(a)
 
 
-def I_assign(a):
+def identity_assign(a):
   b = a
   return b
 
@@ -314,7 +314,7 @@ def third_pow(a):
 
 
 def direct_third_pow(a):
-  return a**3
+  return a ** 3
 
 
 def iter_third_pow1(a):
@@ -392,7 +392,11 @@ def numpy_exp2(a):
 
 
 def numpy_sqrt(a):
-  return np.sqrt(a)
+  if a >= 0:
+    r = np.sqrt(a)
+  else:
+    r = np.sqrt(-a)
+  return r
 
 
 def numpy_cos(a):
@@ -756,7 +760,10 @@ def stack_pushing(a):
 
 
 def gradgrad_pow(a, b):
-  a = a ** b
+  if a >= 0:
+    a = a ** b
+  else:
+    a = (-a) ** b
   return a
 
 

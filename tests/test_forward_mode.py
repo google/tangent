@@ -27,28 +27,28 @@ import tfe_utils
 import utils
 
 
-def test_grad_unary(func, preserve_result, a):
-  """Test gradients of single-argument scalar functions."""
+def test_deriv_unary(func, preserve_result, a):
+  """Test derivatives of single-argument scalar functions."""
   utils.test_forward_array(func, (0,), preserve_result, a)
 
 
-def test_grad_binary(func, preserve_result, a, b):
-  """Test gradients of two-argument scalar functions."""
+def test_deriv_binary(func, preserve_result, a, b):
+  """Test derivatives of two-argument scalar functions."""
   utils.test_forward_array(func, (0,), preserve_result, a, b)
 
 
-def test_grad_ternary(func, preserve_result, a, b, c):
-  """Test gradients of three-argument scalar functions."""
+def test_deriv_ternary(func, preserve_result, a, b, c):
+  """Test derivatives of three-argument scalar functions."""
   utils.test_forward_array(func, (0,), preserve_result, a, b, c)
 
 
-def test_grad_binary_int(func, preserve_result, a, n):
-  """Test gradients of functions with scalar and integer input."""
+def test_deriv_binary_int(func, preserve_result, a, n):
+  """Test derivatives of functions with scalar and integer input."""
   utils.test_forward_array(func, (0,), preserve_result, a, n)
 
 
-def test_grad_unary_tensor(func, t):
-  """Test gradients of functions with single tensor input."""
+def test_deriv_unary_tensor(func, t):
+  """Test derivatives of functions with single tensor input."""
   # TODO: remove trace test exemption when tests are consolidated.
   if 'trace' in func.__name__:
     return
@@ -58,8 +58,8 @@ def test_grad_unary_tensor(func, t):
   tfe_utils.test_forward_tensor(func, (0,), t)
 
 
-def test_grad_binary_tensor(func, t1, t2):
-  """Test gradients of functions with binary tensor inputs."""
+def test_deriv_binary_tensor(func, t1, t2):
+  """Test derivatives of functions with binary tensor inputs."""
   if any(n in func.__name__ for n in ('tfe_squared_difference',)):
     utils.assert_forward_not_implemented(func, (0,))
     return
@@ -67,8 +67,8 @@ def test_grad_binary_tensor(func, t1, t2):
   tfe_utils.test_forward_tensor(func, (1,), t1, t2)
 
 
-def test_grad_image(func, timage, tkernel, conv2dstrides):
-  """Test gradients of image functions."""
+def test_deriv_image(func, timage, tkernel, conv2dstrides):
+  """Test derivatives of image functions."""
   utils.assert_forward_not_implemented(func, (0,))
 
 
