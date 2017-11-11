@@ -758,7 +758,10 @@ def stack_pushing(a):
 
 
 def gradgrad_pow(a, b):
-  a = a ** b
+  if a >= 0:
+    a = a ** b
+  else:
+    a = (-a) ** b
   return a
 
 
