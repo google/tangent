@@ -218,7 +218,8 @@ def sin(y, x):
 
 @adjoint(numpy.tan)
 def tan(y, x):
-  d[x] = d[y] / numpy.cos(x) ** 2.0
+  cx = numpy.cos(x)
+  d[x] = d[y] / (cx * cx)
 
 
 @adjoint(numpy.cosh)
