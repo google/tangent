@@ -103,12 +103,12 @@ def tsub(z, x, y):
 
 @tangent_(gast.Div)
 def tdiv(z, x, y):
-  d[z] = (d[x] * y - x * d[y]) / (y**2.0)
+  d[z] = (d[x] * y - x * d[y]) / (y * y)
 
 
 @tangent_(gast.Pow)
 def tpow(z, x, y):
-  d[z] = y * (x**(y - 1.0)) * d[x]
+  d[z] = y * (x ** (y - 1.0)) * d[x]
 
 
 @tangent_(gast.USub)
@@ -148,7 +148,8 @@ def tsin(z, x):
 
 @tangent_(numpy.tan)
 def ttan(z, x):
-  d[z] = d[x] / numpy.cos(x) ** 2.0
+  cx = numpy.cos(x)
+  d[z] = d[x] / (cx * cx)
 
 
 @tangent_(numpy.cosh)
@@ -163,7 +164,8 @@ def tsinh(z, x):
 
 @tangent_(numpy.tanh)
 def ttanh(z, x):
-  d[z] = d[x] / numpy.cosh(x)**2.0
+  cx = numpy.cosh(x)
+  d[z] = d[x] / (cx * cx)
 
 
 @tangent_(numpy.arccos)
