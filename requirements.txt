@@ -1,5 +1,5 @@
 autograd>=1.2
-astor==0.6
+astor>=0.6
 enum34
 future
 gast
