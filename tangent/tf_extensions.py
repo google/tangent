@@ -20,7 +20,6 @@ from tangent import non_differentiable
 from tangent import tangents
 from tangent import utils
 from tangent.grads import adjoint
-from tangent.grads import DEFAULT
 from tangent.tangents import tangent_
 from tangent.utils import register_all_add_grad
 from tangent.utils import register_init_grad
@@ -213,20 +212,20 @@ def dtfreshape(y, x, shape):
 
 
 @adjoint(tf.reduce_sum)
-def dtfreduce_sum(y, x, axis=DEFAULT, keep_dims=DEFAULT):
+def dtfreduce_sum(y, x, axis=None, keep_dims=False):
   # TODO: We may be able to assume unreduce_tensor works throughout.
   d[x] = tangent.unreduce(d[y], tangent.shape_as_list(x), axis, keep_dims)
 
 
 @adjoint(tf.reduce_mean)
-def dtfreduce_mean(y, x, axis=DEFAULT, keep_dims=DEFAULT):
+def dtfreduce_mean(y, x, axis=None, keep_dims=False):
   n = tf.constant(float(tangent.size(x, axis)))
   d[x] = tf.divide(
       tangent.unreduce(d[y], tangent.shape_as_list(x), axis, keep_dims), n)
 
 
 @adjoint(tf.reduce_max)
-def dtfreduce_max(y, x, axis=DEFAULT, keep_dims=DEFAULT):
+def dtfreduce_max(y, x, axis=None, keep_dims=False):
   mask = tf.to_float(
       tf.equal(
           tangent.unreduce(y, tangent.shape_as_list(x), axis, keep_dims), x))
@@ -272,7 +271,7 @@ def dtfsquared_difference(z, x, y):
 
 
 @adjoint(tf.matmul)
-def dtfmatmul(z, x, y, transpose_a=DEFAULT, transpose_b=DEFAULT):
+def dtfmatmul(z, x, y, transpose_a=False, transpose_b=False):
   d[x] = tangent.matmul_adjoint_x(d[z], x, y, transpose_a, transpose_b)
   d[y] = tangent.matmul_adjoint_y(d[z], x, y, transpose_a, transpose_b)
 
@@ -363,17 +362,17 @@ def ttfreshape(y, x, shape):
 
 
 @tangent_(tf.reduce_sum)
-def ttfreduce_sum(y, x, axis=DEFAULT, keep_dims=DEFAULT):
+def ttfreduce_sum(y, x, axis=None, keep_dims=False):
   d[y] = tf.reduce_sum(d[x], axis, keep_dims)
 
 
 @tangent_(tf.reduce_mean)
-def ttfreduce_mean(y, x, axis=DEFAULT, keep_dims=DEFAULT):
+def ttfreduce_mean(y, x, axis=None, keep_dims=False):
   d[y] = tf.reduce_mean(d[x], axis, keep_dims)
 
 
 @tangent_(tf.reduce_max)
-def ttfreduce_max(y, x, axis=DEFAULT, keep_dims=DEFAULT):
+def ttfreduce_max(y, x, axis=None, keep_dims=False):
   mask = tf.to_float(
       tf.equal(
           tangent.unreduce(
