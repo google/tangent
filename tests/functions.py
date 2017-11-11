@@ -314,7 +314,7 @@ def third_pow(a):
 
 
 def direct_third_pow(a):
-  return a**3
+  return a ** 3
 
 
 def iter_third_pow1(a):
@@ -393,8 +393,10 @@ def numpy_exp2(a):
 
 def numpy_sqrt(a):
   if a >= 0:
-    return np.sqrt(a)
-  return np.sqrt(-a)
+    r = np.sqrt(a)
+  else:
+    r = np.sqrt(-a)
+  return r
 
 
 def numpy_cos(a):
