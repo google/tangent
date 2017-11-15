@@ -1,5 +1,7 @@
 # Tangent 
 
+[![Join the chat at https://gitter.im/google/tangent](https://badges.gitter.im/google/tangent.svg)](https://gitter.im/google/tangent?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 [![Build Status](https://travis-ci.org/google/tangent.svg?branch=master)](https://travis-ci.org/google/tangent)
 
 Tangent is a new, free, and open-source Python library for automatic differentiation.  
