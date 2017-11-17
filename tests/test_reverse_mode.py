@@ -101,6 +101,16 @@ def test_bilinear(optimized):
   assert np.allclose(num_dx, dx)
 
 
+def test_attributes():
+  def f(x):
+    return x.shape
+  try:
+    utils.test_reverse_array(f, 'JOINT', False, False, np.array([1.0, 2.0]))
+    assert False
+  except ValueError as expected:
+    assert 'attributes are not yet supported' in str(expected)
+
+
 def test_grad_unary(func, motion, optimized, preserve_result, a):
   """Test gradients of single-argument scalar functions."""
   utils.test_reverse_array(func, motion, optimized, preserve_result, a)
