@@ -201,14 +201,14 @@ def uadd(y, x):
 #
 
 
+@adjoint(numpy.tanh)
+def tanh(y, x):
+  d[x] = d[y] * (1.0 - (y * y))
+
+
 @adjoint(numpy.log)
 def log(y, x):
   d[x] = d[y] / x
-
-
-@adjoint(numpy.cos)
-def cos(y, x):
-  d[x] = -d[y] * numpy.sin(x)
 
 
 @adjoint(numpy.sin)
@@ -216,10 +216,9 @@ def sin(y, x):
   d[x] = d[y] * numpy.cos(x)
 
 
-@adjoint(numpy.tan)
-def tan(y, x):
-  cx = numpy.cos(x)
-  d[x] = d[y] / (cx * cx)
+@adjoint(numpy.cos)
+def cos(y, x):
+  d[x] = -d[y] * numpy.sin(x)
 
 
 @adjoint(numpy.cosh)
@@ -230,26 +229,6 @@ def cosh(y, x):
 @adjoint(numpy.sinh)
 def sinh(y, x):
   d[x] = d[y] * numpy.cosh(x)
-
-
-@adjoint(numpy.tanh)
-def tanh(y, x):
-  d[x] = d[y] * (1.0 - (y * y))
-
-
-@adjoint(numpy.arccos)
-def arccos(y, x):
-  d[x] = -d[y] / numpy.sqrt(1.0 - x * x)
-
-
-@adjoint(numpy.arcsin)
-def arcsin(y, x):
-  d[x] = d[y] / numpy.sqrt(1.0 - x * x)
-
-
-@adjoint(numpy.arctan)
-def arctan(y, x):
-  d[x] = d[y] / (1.0 + x * x)
 
 
 @adjoint(numpy.exp)
@@ -310,22 +289,19 @@ def maximum(ans, x, y):
   d[x] = d[ans] * tangent.balanced_eq(x, ans, y)
   d[y] = d[ans] * tangent.balanced_eq(y, ans, x)
 
-
 @adjoint(numpy.array)
 def aarray(ans,x):
   d[x] = tangent.astype(d[ans],x)
 
-
+  
 @adjoint(numpy.linalg.det)
 def adet(z, x):
   """d|A|/dA = adj(A).T
 
   See  Jacobi's formula: https://en.wikipedia.org/wiki/Jacobi%27s_formula
   """
-  adjugate = numpy.linalg.det(x) * numpy.linalg.pinv(x)
-  d[x] = d[z] * numpy.transpose(adjugate)
-
-
+  adjugate = np.linalg.det(x) * np.linalg.pinv(x)
+  d[x] = adjugate.T
 #
 # Tangent adjoints
 #

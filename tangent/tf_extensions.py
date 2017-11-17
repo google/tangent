@@ -58,7 +58,7 @@ register_init_grad(resource_variable_ops.ResourceVariable, tf.zeros_like)
 
 
 register_all_add_grad(
-    tf.add, ops.EagerTensor, resource_variable_ops.ResourceVariable)
+    tf.add, (ops.EagerTensor, resource_variable_ops.ResourceVariable))
 
 
 #
