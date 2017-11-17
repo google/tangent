@@ -103,12 +103,12 @@ def tsub(z, x, y):
 
 @tangent_(gast.Div)
 def tdiv(z, x, y):
-  d[z] = (d[x] * y - x * d[y]) / (y**2.0)
+  d[z] = (d[x] * y - x * d[y]) / (y * y)
 
 
 @tangent_(gast.Pow)
 def tpow(z, x, y):
-  d[z] = y * (x**(y - 1.0)) * d[x]
+  d[z] = y * (x ** (y - 1.0)) * d[x]
 
 
 @tangent_(gast.USub)
@@ -136,19 +136,20 @@ def tlist(z, x):
 #
 
 
-@tangent_(numpy.sin)
-def tsin(z, x):
-  d[z] = d[x] * numpy.cos(x)
-
-
 @tangent_(numpy.cos)
 def tcos(z, x):
   d[z] = -d[x] * numpy.sin(x)
 
 
-@tangent_(numpy.tanh)
-def ttanh(z, x):
-  d[z] = d[x] / numpy.cosh(x)**2.0
+@tangent_(numpy.sin)
+def tsin(z, x):
+  d[z] = d[x] * numpy.cos(x)
+
+
+@tangent_(numpy.tan)
+def ttan(z, x):
+  cx = numpy.cos(x)
+  d[z] = d[x] / (cx * cx)
 
 
 @tangent_(numpy.cosh)
@@ -159,6 +160,27 @@ def tcosh(z, x):
 @tangent_(numpy.sinh)
 def tsinh(z, x):
   d[z] = d[x] * numpy.cosh(x)
+
+
+@tangent_(numpy.tanh)
+def ttanh(z, x):
+  cx = numpy.cosh(x)
+  d[z] = d[x] / (cx * cx)
+
+
+@tangent_(numpy.arccos)
+def tarccos(z, x):
+  d[z] = -d[x] / numpy.sqrt(1.0 - x * x)
+
+
+@tangent_(numpy.arcsin)
+def tarcsin(z, x):
+  d[z] = d[x] / numpy.sqrt(1.0 - x * x)
+
+
+@tangent_(numpy.arctan)
+def tarctan(z, x):
+  d[z] = d[x] / (1.0 + x * x)
 
 
 @tangent_(numpy.exp)
