@@ -410,6 +410,9 @@ class ReverseAD(object):
         op_id=op_id)
     return primal, adjoint
 
+  def visit_Attribute(self, node):
+    raise ValueError('attributes are not yet supported for gradients')
+
   def visit_Assign(self, node):
     """Visit assignment statement."""
     if len(node.targets) != 1:
