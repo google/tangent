@@ -11,48 +11,9 @@
 #      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #      See the License for the specific language governing permissions and
 #      limitations under the License.
-"""Utilities to take derivatives of Python functions.
-
-For notation and theory, please refer to Chapter 3 of "Evaluating Derivatives"
-by Griewank and Walther.
-
-We expose a few APIs to do this.
-- grad(f): generate gradient of a function f : R^n -> R. Scalar output will be
-checked.
-- autodiff(f, mode='forward'): generate the forward-mode derivative of a
-function f.
-    Best for functions f: R^n -> R^m where m >> n
-- autodiff(f, mode='reverse'): generate the reverse-mode derivative of a
-function f.
-  Best for functions f: R^n -> R^m where n >> m.
-
-
-Forward-mode and reverse-mode are the two main ways to calculate derivatives.
-Given a function `F`, with two arguments:
-
-```
-Z = F(X, Y)
-```
-
-we can calculate in "forward mode", which returns
-
-```
-# Forward mode
-# dZ, given dX, X, Y
-dZ = dF(X, Y, dX))
-```
-
-or, we can calculate the derivative of the in "reverse mode", which returns
-```
-# Reverse mode
-# bX, given bZ, X, Y
-bX = bF(X, Y, bZ)
-```
-
-"""
+"""Utilities to take derivatives of Python functions."""
 from __future__ import absolute_import
 
-import enum
 import inspect
 import gast
 import numpy
@@ -69,11 +30,8 @@ from tangent import optimization
 from tangent import quoting
 from tangent import reverse_ad
 
-INPUT_DERIVATIVE = enum.Enum('InputDerivative',
-                             ('Required', 'DefaultOne', 'DefaultOnes'))
 
-
-def autodiff_ast(func, wrt, motion, mode, preserve_result, check_dims, verbose):
+def grad_ast(func, wrt, motion, mode, preserve_result, verbose):
   """Perform AD on a single function and return the AST.
 
   Args:
@@ -94,7 +52,7 @@ def autodiff_ast(func, wrt, motion, mode, preserve_result, check_dims, verbose):
     print(quoting.to_source(node))
   if mode == 'reverse':
     node, required, stack = reverse_ad.reverse_ad(node.body[0], wrt,
-                                                  preserve_result, check_dims)
+                                                  preserve_result)
     if verbose >= 2:
       print('RAW')
       print(quoting.to_source(node))
@@ -106,13 +64,11 @@ def autodiff_ast(func, wrt, motion, mode, preserve_result, check_dims, verbose):
       print('MOTION')
       print(quoting.to_source(node))
   elif mode == 'forward':
-    node, required = forward_ad.forward_ad(node.body[0], wrt, preserve_result,
-                                           check_dims)
+    node, required = forward_ad.forward_ad(node.body[0], wrt, preserve_result)
   return node, required
 
 
-def autodiff_tree(func, wrt, motion, mode, preserve_result, check_dims,
-                  verbose):
+def grad_tree(func, wrt, motion, mode, preserve_result, verbose):
   """Perform AD on all functions in a call tree.
 
   This function walks the call tree and differentiates each function in it. It
@@ -140,8 +96,7 @@ def autodiff_tree(func, wrt, motion, mode, preserve_result, check_dims,
   final = gast.Module(body=[])
   namespace.update(six.get_function_globals(func))
 
-  node, required = autodiff_ast(func, wrt, motion, mode, preserve_result,
-                                check_dims, verbose)
+  node, required = grad_ast(func, wrt, motion, mode, preserve_result, verbose)
   final.body.extend(node.body)
 
   to_do = set(required)
@@ -152,16 +107,8 @@ def autodiff_tree(func, wrt, motion, mode, preserve_result, check_dims,
   while to_do:
     func, wrt = to_do.pop()
     namespace.update(six.get_function_globals(func))
-
-    node, required = autodiff_ast(
-        func=func,
-        wrt=wrt,
-        motion='split',
-        mode=mode,
-        preserve_result=True,
-        check_dims=False,
-        verbose=verbose)
-
+    node, required = grad_ast(func, wrt, 'split',
+                              mode, True, verbose)
     final.body.extend(node.body)
     done.add((func, wrt))
     to_do.update(required)
@@ -170,69 +117,17 @@ def autodiff_tree(func, wrt, motion, mode, preserve_result, check_dims,
   return final, namespace
 
 
-def vjp(func,
-        wrt=(0,),
-        optimized=True,
-        check_dims=True,
-        preserve_result=False,
-        verbose=0):
-  """Convenience function to produce vector-Jacobian products.
+def grad(func,
+         wrt=(0,),
+         optimized=True,
+         motion='joint',
+         mode='reverse',
+         preserve_result=False,
+         verbose=False):
+  """Return a function for the vector-Jacobian product.
 
-  See `autodiff` for function arguments.
-  Uses reverse-mode joint-motion autodiff to produce the VJP.
-  """
-  return autodiff(
-      func,
-      wrt=wrt,
-      motion='joint',
-      mode='reverse',
-      optimized=optimized,
-      preserve_result=preserve_result,
-      input_derivative=INPUT_DERIVATIVE.Required,
-      check_dims=check_dims,
-      verbose=verbose)
-
-
-def jvp(func,
-        wrt=(0,),
-        optimized=True,
-        check_dims=True,
-        preserve_result=False,
-        verbose=0):
-  """Convenience function to produce Jacobian-vector products.
-
-  See `autodiff` for function arguments.
-  Uses forward-mode autodiff to produce the JVP.
-  """
-  return autodiff(
-      func,
-      wrt=wrt,
-      mode='forward',
-      optimized=optimized,
-      preserve_result=preserve_result,
-      input_derivative=INPUT_DERIVATIVE.Required,
-      check_dims=check_dims,
-      verbose=verbose)
-
-
-def autodiff(func,
-             wrt=(0,),
-             optimized=True,
-             motion='joint',
-             mode='reverse',
-             preserve_result=False,
-             check_dims=True,
-             input_derivative=INPUT_DERIVATIVE.Required,
-             verbose=0):
-  """Build the vector-Jacobian or Jacobian-vector product of a function `func`.
-
-  For a vector-Jacobian product (reverse-mode autodiff):
   This function proceeds by finding the primals and adjoints of all the
-  functions in the call tree.
-  For a Jacobian-vector product (forward-mode autodiff):
-  We first find the primals and tangents of all functions in the call tree.
-
-  It then wraps the top level function (i.e. the
+  functions in the call tree. It then wraps the top level function (i.e. the
   one passed as `func`) in a slightly more user-friendly interface. It then
   compiles the function and attaches to it the global namespace it needs to
   run.
@@ -248,10 +143,6 @@ def autodiff(func,
     mode: Either 'forward' or 'reverse' mode. Forward mode is more efficient
         when the input dimensionality is lower than the output dimensionality,
         whereas it is the opposite for reverse mode.
-    input_derivative: An enum indicating whether the user must supply an input
-        derivative, and if not, what the default value is. See the
-        possible values of INPUT_DERIVATIVE in this file.
-
     preserve_result: A boolean indicating whether or not the generated gradient
         function should also return the output of the original function.
         If False, the return signature of the input and output functions will be
@@ -268,14 +159,12 @@ def autodiff(func,
         > df = grad(func,wrt=(0,1),preserve_result=True)
         > dx,dy,val = df(x,y)
 
-    verbose: If 1 the source code of the generated functions will be
+    verbose: If `True` the source code of the generated functions will be
         output to stdout at various stages of the process for debugging
-        purposes. If > 1, all intermediate code generation steps will print.
+        purposes.
 
   Returns:
-    df: A function that calculates a derivative (see file-level documentation
-    above
-        for the kinds of derivatives available) with respect to arguments
+    df: A function that calculates the gradient with respect to arguments
         specified in `wrt`, using forward or reverse mode according to `mode`.
         If using reverse mode, the gradient is calculated in either split
         or joint motion according to the value passed in `motion`. If
@@ -285,19 +174,18 @@ def autodiff(func,
   # If the function had the with insert_grad_of statements removed, retrieve them
   func = getattr(func, 'tangent', func)
 
-  # Generate the derivative
-  node, namespace = autodiff_tree(func, wrt, motion, mode, preserve_result,
-                                  check_dims, verbose)
+  # Take the gradient
+  node, namespace = grad_tree(func, wrt, motion, mode, preserve_result, verbose)
 
   if mode == 'reverse' and motion == 'joint':
     # Pull the stack definition and initial gradient into the function body
     # TODO: Use first FunctionDef instead of first element
-    node.body[0] = _create_joint(node.body[0], func, wrt, input_derivative)
+    node.body[0] = create_joint(node.body[0], func, wrt)
     if verbose >= 2:
       print('INLINED')
       print(quoting.to_source(node))
   if mode == 'forward':
-    node = _create_forward(node)
+    node = create_forward(node)
   if optimized:
     # Optimize the resulting functions
     node = optimization.optimize(node)
@@ -330,65 +218,7 @@ def autodiff(func,
     return df
 
 
-def grad(func,
-         wrt=(0,),
-         optimized=True,
-         preserve_result=False,
-         check_dims=True,
-         verbose=0):
-  """Return the gradient of a function `func`.
-  Args:
-    func: The function to take the gradient of.
-    wrt: A tuple of argument indices to differentiate with respect to. By
-        default the derivative is taken with respect to the first argument.
-    optimized: Whether to optimize the gradient function (`True` by default).
-    preserve_result: A boolean indicating whether or not the generated gradient
-        function should also return the output of the original function.
-        If False, the return signature of the input and output functions will be
-        > val = func(*args)
-        > df = grad(func,preserve_result=False)
-        > gradval = df(*args)
-        If True,
-        > val = func(*args)
-        > df = grad(func,preserve_result=True)
-        > gradval, val = func(*args)
-        Note that if taking gradients with respect to multiple arguments,
-        the primal value will be appended to the return signature. Ex:
-        > val = func(x,y)
-        > df = grad(func,wrt=(0,1),preserve_result=True)
-        > dx,dy,val = df(x,y)
-    check_dims: A boolean (`True` by default) indicating whether to check
-        that the result of the original function `func` is a scalar, raising
-        an error if it is not.
-        Gradients are only valid for scalar-valued outputs, so we check
-        this by defualt.
-    verbose: If 1 the source code of the generated functions will be
-        output to stdout at various stages of the process for debugging
-        purposes. If > 1, all intermediate code generation steps will print.
-
-  Returns:
-    df: A function that calculates the gradient with respect to arguments
-        specified in `wrt`, using forward or reverse mode according to `mode`.
-        If using reverse mode, the gradient is calculated in either split
-        or joint motion according to the value passed in `motion`. If
-        `preserve_result` is True, the function will also return the original
-        result of `func`.
-  """
-  return autodiff(
-      func,
-      wrt=wrt,
-      motion='joint',
-      mode='reverse',
-      optimized=optimized,
-      preserve_result=preserve_result,
-      check_dims=check_dims,
-      input_derivative=INPUT_DERIVATIVE.DefaultOne,
-      verbose=verbose)
-
-
-# TODO: these are utility functions, designed only for internal use.
-# Should be moved to a separate file.
-def _create_joint(fwdbwd, func, wrt, input_derivative):
+def create_joint(fwdbwd, func, wrt):
   """Create a user-friendly gradient function.
 
   By default, gradient functions expect the stack to be passed to them
@@ -400,9 +230,9 @@ def _create_joint(fwdbwd, func, wrt, input_derivative):
   length one.
 
   Args:
-    fwdbwd: An AST. The function definition of the joint primal and adjoint.
-    func: A function handle. The original function that was differentiated.
-    wrt: A tuple of integers. The arguments with respect to which we differentiated.
+    fwdbwd: The function definition of the joint primal and adjoint.
+    func: The original function that was differentiated.
+    wrt: The arguments with respect to which we differentiated.
 
   Returns:
     The function definition of the new function.
@@ -428,12 +258,11 @@ def _create_joint(fwdbwd, func, wrt, input_derivative):
 
   # Allow the initial gradient to be passed as a keyword argument
   fwdbwd = ast_.append_args(fwdbwd, [grad_name])
-  if input_derivative == INPUT_DERIVATIVE.DefaultOne:
-    fwdbwd.args.defaults.append(quoting.quote('1.0'))
+  fwdbwd.args.defaults.append(quoting.quote('1.0'))
   return fwdbwd
 
 
-def _create_forward(out_node):
+def create_forward(out_node):
   """Create a user-friendly forward function.
 
   Ensures that a single value instead of a tuple is returned if the user asked

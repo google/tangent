@@ -62,7 +62,7 @@ class TreeTransformer(gast.NodeTransformer):
     self._top = True
 
   def prepend(self, node):
-    """Prepend a statement to the current statement.
+    """Prepend a statement to the curren statement.
 
     Note that multiple calls to prepend will result in the last statement to be
     prepended to end up at the top.

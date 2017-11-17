@@ -62,14 +62,8 @@ def _test_hvp(func, optimized):
     for mode2 in modes:
       if mode1 == mode2 == 'forward':
         continue
-      df = tangent.autodiff(
-          func,
-          mode=mode1,
-          motion='joint',
-          optimized=optimized,
-          check_dims=False)
-      ddf = tangent.autodiff(
-          df, mode=mode2, motion='joint', optimized=optimized, check_dims=False)
+      df = tangent.grad(func, mode=mode1, motion='joint', optimized=optimized)
+      ddf = tangent.grad(df, mode=mode2, motion='joint', optimized=optimized)
       dx = ddf(a, 1, v)
       hvp_ag = hessian_vector_product(func)
       dx_ag = hvp_ag(a, v)
@@ -85,14 +79,8 @@ def _test_tf_hvp(func, optimized):
     for mode2 in modes:
       if mode1 == mode2 == 'forward':
         continue
-      df = tangent.autodiff(
-          func,
-          mode=mode1,
-          motion='joint',
-          optimized=optimized,
-          check_dims=False)
-      ddf = tangent.autodiff(
-          df, mode=mode2, motion='joint', optimized=optimized, check_dims=False)
+      df = tangent.grad(func, mode=mode1, motion='joint', optimized=optimized)
+      ddf = tangent.grad(df, mode=mode2, motion='joint', optimized=optimized)
       dx = ddf(a, tf.constant(1.0), v)
       # We just ensure it computes something in this case.
       assert dx.shape == a.shape

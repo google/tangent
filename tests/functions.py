@@ -56,7 +56,7 @@ def tanh(a):
   return np.tanh(a)
 
 
-def identity_assign(a):
+def I_assign(a):
   b = a
   return b
 
@@ -314,7 +314,7 @@ def third_pow(a):
 
 
 def direct_third_pow(a):
-  return a ** 3
+  return a**3
 
 
 def iter_third_pow1(a):
@@ -390,62 +390,8 @@ def numpy_exp(a):
 def numpy_exp2(a):
   return np.exp(np.exp(a))
 
-
 def numpy_sqrt(a):
-  if a >= 0:
-    r = np.sqrt(a)
-  else:
-    r = np.sqrt(-a)
-  return r
-
-
-def numpy_cos(a):
-  return np.cos(a)
-
-
-def numpy_sin(a):
-  return np.sin(a)
-
-
-def numpy_tan(a):
-  return np.tan(a)
-
-
-def numpy_cosh(a):
-  return np.cosh(a)
-
-
-def numpy_sinh(a):
-  return np.sinh(a)
-
-
-def numpy_tanh(a):
-  return np.tanh(a)
-
-
-def numpy_arccos(a):
-  return np.arccos(a)
-
-
-def numpy_arcsin(a):
-  return np.arcsin(a)
-
-
-def numpy_arctan(a):
-  return np.arctan(a)
-
-
-def numpy_atleast_1d(x):
-  return np.sum(np.atleast_1d(x))
-
-
-def numpy_atleast_2d(x):
-  return np.sum(np.atleast_2d(x))
-
-
-def numpy_atleast_3d(x):
-  return np.sum(np.atleast_3d(x))
-
+  return np.sqrt(a)
 
 # Label is 0 or 1
 
@@ -456,11 +402,6 @@ def logistic_regression(input, label, W, b):
   label_probabilities = prediction * label + (1 - prediction) * (1 - label)
   loss = -np.sum(np.log(label_probabilities))
   return loss
-
-
-def det(sqm):
-  return np.linalg.det(sqm)
-
 
 # ================================================
 # TFE grads
@@ -772,10 +713,7 @@ def stack_pushing(a):
 
 
 def gradgrad_pow(a, b):
-  if a >= 0:
-    a = a ** b
-  else:
-    a = (-a) ** b
+  a = a ** b
   return a
 
 

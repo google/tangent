@@ -59,14 +59,6 @@ class ForwardAD(transformers.TreeTransformer):
     preserve_result: A boolean indicating whether the return value
         of the original function should be preserved. If True, will append
         the original return value to the derivative in a tuple.
-    check_dims: A boolean indicating whether the user-provided derivatives
-        must have the same shape as their corresponding arguments. For example,
-
-        > f = lambda x: x * x
-        > df = autodiff(f,mode='forward',check_dims=True)
-        > df(3.0, 1.0) # succeeds
-        > df(np.eye(3), 1.0) # fails, x is a matrix, dx is a scalar
-
 
   Attributes:
     required: List of user-defined functions that the primal calls.
@@ -74,13 +66,12 @@ class ForwardAD(transformers.TreeTransformer):
         global namespace.
   """
 
-  def __init__(self, wrt, preserve_result, check_dims):
+  def __init__(self, wrt, preserve_result=False):
     self.wrt = wrt
     self.required = []
     self.target = None
     self.metastack = []
     self.preserve_result = preserve_result
-    self.check_dims = check_dims
     super(ForwardAD, self).__init__()
     self._tmp_node = None
 
@@ -129,30 +120,8 @@ class ForwardAD(transformers.TreeTransformer):
         create.create_grad(arg, self.namer, tangent=True)
         for i, arg in enumerate(node.args.args) if i in self.wrt
     ]
-    if len(self.wrt) != len(grad_args):
-      raise ValueError(
-          'Mismatch between requested and retrieved derivative arguments. '
-          'Requested %d, found %d') % (len(self.wrt), len(grad_args))
 
     node.args.args += grad_args
-
-    if self.check_dims:
-      # Define the shape check code quote
-      def shape_match_template(primal, tangent_):
-        if not tangent.shapes_match(primal, tangent_):
-          raise ValueError(
-              'Shape mismatch between argument value (%s) and seed derivative '
-              '(%s)' \
-        % (numpy.shape(primal), numpy.shape(tangent_)))
-
-      # Add a shape check for each seed derivative & primal pair.
-      shape_check_nodes = []
-      for iwrt, tangent_var in zip(self.wrt, grad_args):
-        primal = node.args.args[iwrt]
-        shape_check = template.replace(
-            shape_match_template, primal=primal, tangent_=tangent_var)[0]
-        shape_check_nodes.append(shape_check)
-      node.body = shape_check_nodes + node.body
 
     # Add in gradient initialization statements for everything else
     grad_init_nodes = [
@@ -459,9 +428,9 @@ class ForwardAD(transformers.TreeTransformer):
     code duplication.
     """
     constant_val = {
-        True: 'True',
-        False: 'False',
-        None: 'None',
+      True:'True',
+      False:'False',
+      None:'None',
     }[node.value]
     new_node = gast.Name(id=constant_val,ctx=gast.Load(),annotation=None)
     return self.visit_Name(new_node)
@@ -553,7 +522,7 @@ class ForwardAD(transformers.TreeTransformer):
     return node
 
 
-def forward_ad(node, wrt, preserve_result=False, check_dims=True):
+def forward_ad(node, wrt, preserve_result=False):
   """Perform forward-mode AD on an AST.
 
   This function analyses the AST to determine which variables are active and
@@ -566,8 +535,6 @@ def forward_ad(node, wrt, preserve_result=False, check_dims=True):
         derivative.
     preserve_result: A boolean indicating whether the original
         non-differentiated function value should be returned
-    check_dims: A boolean indicating whether the provided derivatives should
-        have the same shape as their corresponding arguments.
 
   Returns:
     mod: A `Module` node containing the naive primal and adjoint of the
@@ -583,7 +550,7 @@ def forward_ad(node, wrt, preserve_result=False, check_dims=True):
   cfg.Active(range(len(node.args.args))).visit(cfg_obj.entry)
 
   # Build forward mode function
-  fad = ForwardAD(wrt, preserve_result, check_dims)
+  fad = ForwardAD(wrt, preserve_result)
   node = fad.visit(node)
 
   # Annotate stacks

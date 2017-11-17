@@ -1,19 +1,18 @@
 # Tangent 
 
 [![Build Status](https://travis-ci.org/google/tangent.svg?branch=master)](https://travis-ci.org/google/tangent)
-[![Join the chat at https://gitter.im/google/tangent](https://badges.gitter.im/google/tangent.svg)](https://gitter.im/google/tangent?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 Tangent is a new, free, and open-source Python library for automatic differentiation.  
 
 
-Existing libraries implement automatic differentiation by tracing a program's execution (at runtime, like PyTorch) or by staging out a dynamic data-flow graph and then differentiating the graph (ahead-of-time, like TensorFlow). In contrast, Tangent performs ahead-of-time autodiff on the Python source code itself, and produces Python source code as its output. Tangent fills a unique location in the space of machine learning tools.
+Existing libraries implement automatic differentiation by tracing a program’s execution (at runtime, like PyTorch) or by staging out a dynamic data-flow graph and then differentiating the graph (ahead-of-time, like TensorFlow). In contrast, Tangent performs ahead-of-time autodiff on the Python source code itself, and produces Python source code as its output. Tangent fills a unique location in the space of machine learning tools.
 
 ![Autodiff Tool Space](docs/toolspace.png "Autodiff Tool Space")
 
 
 As a result, you can finally read your automatic derivative code just like the rest of your program. Tangent is useful to researchers and students who not only want to write their models in Python, but also read and debug automatically-generated derivative code without sacrificing speed and flexibility.
 
-Tangent works on a large and growing subset of Python, provides extra autodiff features other Python ML libraries don't have, has reasonable performance, and is compatible with TensorFlow and NumPy.
+Tangent works on a large and growing subset of Python, provides extra autodiff features other Python ML libraries don’t have, has reasonable performance, and is compatible with TensorFlow and NumPy.
 
 This project is an experimental release, and is under active development. As we continue to build Tangent, and respond to feedback from the community, there might be API changes.
 
@@ -84,7 +83,7 @@ Tangent has recipes for auto-generating derivatives for code that contains if st
 
 ![SCT on Conditionals](docs/sct-ad-conditional.gif "SCT on Conditionals")
 
-You'll notice above that we have to modify the user's code to keep track of information that we will need in the backward pass. For instance, we need to save which branch of an if-statement was followed in the forward pass, so that we run the correct branch in the backward pass. We save this information from the forward pass by pushing it onto a stack, which we then pop off in the backward pass. This is an important data structure in ahead-of-time autodiff.
+You’ll notice above that we have to modify the user’s code to keep track of information that we will need in the backward pass. For instance, we need to save which branch of an if-statement was followed in the forward pass, so that we run the correct branch in the backward pass. We save this information from the forward pass by pushing it onto a stack, which we then pop off in the backward pass. This is an important data structure in ahead-of-time autodiff.
 
 For loops require a little more bookkeeping. Tangent has to save the number of iterations of the loop on the stack. Also, loops usually overwrite the values of variables inside the loop body. In order to generate a correct derivative, Tangent has to keep track of all of the overwritten values, and restore them in the backward pass in the correct order.
 
@@ -148,7 +147,7 @@ Because Tangent auto-generates derivative code you can read, you can also easily
 
 ![SCT for Debugging](docs/sct-ad-debugging.png "SCT for Debugging")
 
-For large models, setting a breakpoint at the beginning of the backward pass and stepping through dozens of lines might be cumbersome. Instead, you might want the breakpoint to be placed later in the derivative calculation. Tangent lets you insert code directly into any location in the backward pass. First, run `from tangent import insert_grad_of`, then add a with `insert_grad_of` block containing the code you'd like to insert into the backward pass.
+For large models, setting a breakpoint at the beginning of the backward pass and stepping through dozens of lines might be cumbersome. Instead, you might want the breakpoint to be placed later in the derivative calculation. Tangent lets you insert code directly into any location in the backward pass. First, run `from tangent import insert_grad_of`, then add a with `insert_grad_of` block containing the code you’d like to insert into the backward pass.
 
 ```python
 
@@ -201,7 +200,7 @@ forward_df = tangent.grad(f, mode='forward')
 
 ## Hessian-Vector Products
 
-Although we won't dig into the technical details, forward-mode is very useful when combined with reverse-mode to calculate efficient higher-order derivatives, particularly for Hessian-vector products (HVP) of NNs. This is useful in research applications, and usually very painful and slow to calculate. Autograd has native forward-mode support, while TensorFlow has 3rd-party support.
+Although we won’t dig into the technical details, forward-mode is very useful when combined with reverse-mode to calculate efficient higher-order derivatives, particularly for Hessian-vector products (HVP) of NNs. This is useful in research applications, and usually very painful and slow to calculate. Autograd has native forward-mode support, while TensorFlow has 3rd-party support.
 
 To take higher-order derivatives, you can use any combination of forward- and reverse-mode autodiff in Tangent. This works because the code Tangent produces can also be fed back in as input. The autodiff literature recommends calculating HVPs in a "Forward-over-Reverse" style. This means first apply reverse mode autodiff to the function, and then apply forward mode to that.
 
@@ -255,4 +254,4 @@ This will enable PyTorch/Chainer/TFEager-style class definitions of neural netwo
 
 ## Team
 
-Tangent is developed by Alex Wiltschko, Bart van Merrienboer and Dan Moldovan.
+Tangent is developed by Alex Wiltschko, Bart van Merriënboer and Dan Moldovan.
