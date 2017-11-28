@@ -435,6 +435,18 @@ def numpy_arctan(a):
   return np.arctan(a)
 
 
+def numpy_atleast_1d(a):
+  return np.atleast_1d(a)
+
+
+def numpy_atleast_2d(a):
+  return np.atleast_2d(a)
+
+
+def numpy_atleast_3d(a):
+  return np.atleast_3d(a)
+
+
 # Label is 0 or 1
 
 
