@@ -22,6 +22,7 @@ from __future__ import absolute_import
 from __future__ import division
 
 from copy import copy as native_copy
+from numbers import Number
 import types
 
 import autograd
@@ -30,7 +31,6 @@ import six
 from tangent import annotations as anno
 from tangent import non_differentiable
 from tangent import quoting
-
 
 INIT_GRAD = quoting.quote('tangent.init_grad')
 ADD_GRAD = quoting.quote('tangent.add_grad')
@@ -539,6 +539,101 @@ def add_grad(left, right):
   if right_type is ZeroGradient:
     return left
   return grad_adders[(left_type, right_type)](left, right)
+
+
+def array_shapes_match(a, b):
+  return numpy.shape(a) == numpy.shape(b)
+
+
+shape_checkers = {}
+
+
+def register_shape_checker(left_type, right_type, shape_checker_function):
+  """Register a new shape checking function supporting given types.
+
+  Shape checkers are primarily used to make sure that the seed derivatives
+  passed into generated autodiff functions match their corresponding
+  primal values.
+
+  Args:
+    left_type: A Python type object. The data type of the left operand
+      supported by the adder.
+    right_type: A Python type object. The data type of the right operand
+      supported by the adder.
+    shape_checker_function: A binary function that takes two arguments, left and
+      right, of the types left_type and right_type respectively, and returns
+      a boolean indicating whether or not they match.
+
+  Raises:
+    ValueError: If the given type pair was already registered.
+  """
+  key = (left_type, right_type)
+  if key in shape_checkers:
+    raise ValueError('Types %s already mapped to %s' % (key,
+                                                        shape_checkers[key]))
+  shape_checkers[key] = shape_checker_function
+
+
+def register_all_shape_checker(shape_checker_function,
+                               arg_types,
+                               exclude=(),
+                               ignore_existing=False):
+  """Register a gradient adder for all combinations of given types.
+
+  This is a convenience shorthand for calling register_add_grad when registering
+  gradient adders for multiple types that can be interchanged for the purpose
+  of addition.
+
+  Args:
+    shape_checker_function: A shape checker, see register_shape_checker.
+    arg_types: List of Python type objects. The shape checker will be
+      registered for all pairs of these types.
+    exclude: Optional list of type tuples to exclude.
+    ignore_existing: Boolean. Whether to silently skip argument pairs that were
+      already registered.
+  """
+  for t1 in arg_types:
+    for t2 in arg_types:
+      if (t1, t2) in exclude:
+        continue
+      if ignore_existing and (t1, t2) in shape_checkers:
+        continue
+      register_shape_checker(t1, t2, shape_checker_function)
+
+
+def shapes_match(a, b):
+  """Recursively check if shapes of object `a` and `b` match.
+
+  Will walk lists, tuples and dicts.
+
+  Args:
+    a: object of type (numpy.ndarray,tf.Tensor,list,tuple,dict)
+        to check for matching shapes against `b`.
+    b: object to check for matching shape against `a`.
+
+  Returns:
+    A boolean indicating whether the shapes of `a` and `b` match.
+  """
+  if isinstance(a, (tuple, list)) and isinstance(b, (tuple, list)):
+    if len(a) != len(b):
+      return False
+    return all([shapes_match(ia, ib) for ia, ib in zip(a, b)])
+  elif isinstance(a, dict) and isinstance(b, dict):
+    if len(a) != len(b):
+      return False
+    match = True
+    for (ak, av), (bk, bv) in zip(a.items(), b.items()):
+      match = match and all([ak == bk and shapes_match(av, bv)])
+    return match
+  else:
+    shape_checker = shape_checkers[(type(a), type(b))]
+    return shape_checker(a, b)
+
+
+register_all_shape_checker(
+    array_shapes_match, (numpy.ndarray, Number, float, int, numpy.float32,
+                         numpy.float64, numpy.int32, numpy.int64),
+    ignore_existing=True)
 
 
 def push(stack, x, op_id):

@@ -33,8 +33,8 @@ def _test_gradgrad_array(func, optimized, *args):
 
   def tangent_func():
     func.__globals__['np'] = np
-    df = tangent.grad(func, motion='joint', optimized=optimized, verbose=True)
-    ddf = tangent.grad(df, motion='joint', optimized=optimized, verbose=True)
+    df = tangent.grad(func, optimized=optimized, verbose=True)
+    ddf = tangent.grad(df, optimized=optimized, verbose=True)
     return ddf(*args)
 
   def reference_func():

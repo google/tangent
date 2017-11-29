@@ -14,7 +14,7 @@
 """TFE-specific test utils."""
 import numpy as np
 
-from tangent.grad_util import grad
+from tangent.grad_util import autodiff, jvp
 import utils
 
 import tensorflow as tf
@@ -121,7 +121,7 @@ def test_forward_tensor(func, wrt, *args):
   """Test gradients of functions with TFE signatures."""
 
   def tangent_func():
-    df = grad(func, mode='forward', wrt=wrt, optimized=True, verbose=True)
+    df = jvp(func, wrt=wrt, optimized=True, verbose=True)
     args_ = args + tuple(tf.ones_like(args[i]) for i in wrt)  # seed gradient
     return tensors_to_numpy(df(*args_))
 
@@ -143,8 +143,8 @@ def test_gradgrad_tensor(func, optimized, *args):
   """Test gradients of functions with TFE signatures."""
 
   def tangent_func():
-    df = tangent.grad(func, motion='joint', optimized=optimized, verbose=True)
-    ddf = tangent.grad(df, motion='joint', optimized=optimized, verbose=True)
+    df = tangent.autodiff(func, motion='joint', optimized=optimized, verbose=True)
+    ddf = tangent.autodiff(df, motion='joint', optimized=optimized, verbose=True)
     dxx = ddf(*args)
     return tuple(t.numpy() for t in dxx)
 
@@ -171,7 +171,7 @@ def test_rev_tensor(func, motion, optimized, preserve_result, wrt, *args):
       init_grad = tuple(tf.ones_like(t) for t in y)
     else:
       init_grad = tf.ones_like(y)
-    df = grad(
+    df = autodiff(
         func,
         motion=motion,
         optimized=optimized,
