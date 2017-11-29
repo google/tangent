@@ -40,7 +40,7 @@ import tensorflow as tf
 
 def _check_grad_computes(f, inputs, params, state, hparams, lr):
   # We can't verify convergence - it's just too flaky,
-  df = grad(f, (1,), True, 'joint', 'reverse')
+  df = grad(f, (1,), True)
   y = f(inputs, params, state, hparams)
   dp = df(inputs, params, state, hparams, tf.ones_like(y))
   newp = train_utils.map_dicts(lambda v, dv: v - lr * dv, params, dp)

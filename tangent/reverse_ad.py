@@ -112,6 +112,8 @@ class ReverseAD(object):
         be taken.
     preserve_result: A boolean indicating whether or not the generated gradient
         function should also return the output of the original function.
+    check_dims: A boolean indicating whether the seed derivatives should have
+        their dimensions checked to match their primal counterpart.
 
   Attributes:
     required: List of user-defined functions that the primal calls.
@@ -119,10 +121,11 @@ class ReverseAD(object):
         global namespace.
   """
 
-  def __init__(self, wrt, preserve_result):
+  def __init__(self, wrt, preserve_result, check_dims):
     self.required = []
     self.wrt = wrt
     self.preserve_result = preserve_result
+    self.check_dims = check_dims
 
   def visit(self, node):
     """Visit a node.
@@ -233,6 +236,7 @@ class ReverseAD(object):
       body.append(assign_stored_result)
       dx.elts.append(stored_result_node)
 
+
     for _dx in dx.elts:
       _dx.ctx = gast.Load()
     return_dx = gast.Return(value=dx)
@@ -254,6 +258,17 @@ class ReverseAD(object):
       y = y.elts[0]
     dy = gast.Name(id=self.namer.grad(y.id), ctx=gast.Param(),
                    annotation=None)
+
+    if self.check_dims:
+
+      def shape_match_template(primal, adjoint):
+        assert tangent.shapes_match(
+            primal, adjoint
+        ), 'Shape mismatch between return value (%s) and seed derivative (%s)' % (
+            numpy.shape(primal), numpy.shape(adjoint))
+
+      shape_check = template.replace(shape_match_template, primal=y, adjoint=dy)
+      adjoint_body = shape_check + adjoint_body
 
     # Construct the adjoint
     adjoint_template = grads.adjoints[gast.FunctionDef]
@@ -613,6 +628,9 @@ class ReverseAD(object):
   def visit_Compare(self, node):
     return node, []
 
+  def visit_Assert(self, node):
+    return node, []
+
   def primal_and_adjoint_for_tracing(self, node):
     """Build the primal and adjoint of a traceable function.
 
@@ -793,7 +811,7 @@ class ReverseAD(object):
     return node, adjoint
 
 
-def reverse_ad(node, wrt, preserve_result):
+def reverse_ad(node, wrt, preserve_result, check_dims):
   """Perform reverse-mode AD on an AST.
 
   This function analyses the AST to determine which variables are active and
@@ -806,6 +824,9 @@ def reverse_ad(node, wrt, preserve_result):
         derivative.
     preserve_result: A boolean indicating whether the generated
         derivative function should also return the original return value.
+    check_dims: A boolean indicating whether the seed derivatives should have
+        their dimensions checked to match their primal counterpart.
+
 
   Returns:
     mod: A `Module` node containing the naive primal and adjoint of the
@@ -818,7 +839,7 @@ def reverse_ad(node, wrt, preserve_result):
   # Activity analysis
   cfg.forward(node, cfg.Active(wrt))
 
-  ad = ReverseAD(wrt, preserve_result)
+  ad = ReverseAD(wrt, preserve_result, check_dims)
   pri, adj = ad.visit(node)
   mod = gast.Module(body=[pri, adj])
   mod = annotate.find_stacks(mod)

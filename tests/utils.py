@@ -28,7 +28,7 @@ if not hasattr(ag_np, '_NoValue'):
 
 def assert_forward_not_implemented(func, wrt):
   try:
-    tangent.grad(func, mode='forward', preserve_result=False, wrt=wrt)
+    tangent.autodiff(func, mode='forward', preserve_result=False, wrt=wrt)
     assert False, 'Remove this when implementing.'
   except NotImplementedError:
     pass
@@ -113,8 +113,9 @@ def test_reverse_array(func, motion, optimized, preserve_result, *args):
     else:
       init_grad = 1
     func.__globals__['np'] = np
-    df = tangent.grad(
+    df = tangent.autodiff(
         func,
+        mode='reverse',
         motion=motion,
         optimized=optimized,
         preserve_result=preserve_result,
@@ -150,7 +151,7 @@ def test_forward_array(func, wrt, preserve_result, *args):
 
   def tangent_func():
     func.__globals__['np'] = np
-    df = tangent.grad(
+    df = tangent.autodiff(
         func,
         mode='forward',
         preserve_result=preserve_result,
