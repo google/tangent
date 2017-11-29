@@ -14,6 +14,8 @@
 """TensorFlow extensions."""
 from __future__ import absolute_import
 
+from numbers import Number
+
 import numpy as np
 from tangent import grads
 from tangent import non_differentiable
@@ -21,7 +23,9 @@ from tangent import tangents
 from tangent import utils
 from tangent.grads import adjoint
 from tangent.tangents import tangent_
+from tangent.utils import array_shapes_match
 from tangent.utils import register_all_add_grad
+from tangent.utils import register_all_shape_checker
 from tangent.utils import register_init_grad
 from tangent.utils import register_shape_function
 from tangent.utils import register_unbroadcast
@@ -43,6 +47,11 @@ def dtype(t):
 def shape_as_list(t):
   return t.shape.as_list()
 
+
+def tensor_shapes_match(a, b):
+  return tf.shape(a).shape == tf.shape(b).shape
+
+
 register_shape_function(ops.EagerTensor, shape_as_list)
 register_shape_function(resource_variable_ops.ResourceVariable, shape_as_list)
 
@@ -58,8 +67,11 @@ register_init_grad(resource_variable_ops.ResourceVariable, tf.zeros_like)
 
 
 register_all_add_grad(
-    tf.add, ops.EagerTensor, resource_variable_ops.ResourceVariable)
+    tf.add, (ops.EagerTensor, resource_variable_ops.ResourceVariable))
 
+register_all_shape_checker(
+    tensor_shapes_match,
+    (ops.EagerTensor, resource_variable_ops.ResourceVariable))
 
 #
 # Utilities

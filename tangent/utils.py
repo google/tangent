@@ -22,6 +22,7 @@ from __future__ import absolute_import
 from __future__ import division
 
 from copy import copy as native_copy
+from numbers import Number
 import types
 
 import autograd
@@ -30,7 +31,6 @@ import six
 from tangent import annotations as anno
 from tangent import non_differentiable
 from tangent import quoting
-
 
 INIT_GRAD = quoting.quote('tangent.init_grad')
 ADD_GRAD = quoting.quote('tangent.add_grad')
@@ -295,6 +295,33 @@ def init_common_object(obj):
   raise ValueError('Unknown value to initialize: "%s"' % obj)
 
 
+init_zero_int_warnings_left = 3
+init_zero_bool_warnings_left = 3
+
+
+def init_zero_int(_):
+  """Initialize gradient for an integral type. This prints a warning."""
+  global init_zero_int_warnings_left
+  if init_zero_int_warnings_left:
+    print(
+        'WARNING: Creating intermediate variable of an integer type. This may '
+        'lead to unexpected results. If unsure, cast arguments to floating '
+        'point.')
+    init_zero_int_warnings_left -= 1
+  return 0
+
+
+def init_zero_bool(_):
+  """Initialize gradient for an bool type. This prints a warning."""
+  global init_zero_bool_warnings_left
+  if init_zero_bool_warnings_left:
+    print(
+        'WARNING: Creating intermediate variable of a boolean type. This may '
+        'indicate a bug.')
+    init_zero_bool_warnings_left -= 1
+  return False
+
+
 # The values are tuples (initializer, allow_lazy_initializer). If
 # supports_lazy_initializer is true, Tangent may substitude actual instances
 # of the object for the ZeroGradient wrapper, which is a lazy creator.
@@ -303,13 +330,15 @@ grad_initializers = {
     numpy.ndarray: (numpy.zeros_like, False),
     numpy.float32: (lambda obj: 0.0, False),
     numpy.float64: (lambda obj: 0.0, False),
+    numpy.int32: (init_zero_int, False),
+    numpy.int64: (init_zero_int, False),
     list: (lambda obj: [init_grad(el) for el in obj], False),
     tuple: (lambda obj: [init_grad(el) for el in obj], False),
     dict: (lambda obj: {k: init_grad(v) for k, v in six.iteritems(obj)}, False),
     Stack: (lambda obj: Stack(), False),
     float: (lambda obj: 0.0, False),
-    int: (lambda obj: 0, False),
-    bool: (lambda obj: False, False),
+    int: (init_zero_int, False),
+    bool: (init_zero_bool, False),
 }
 
 if hasattr(types, 'ClassType'):
@@ -385,6 +414,21 @@ def init_grad(obj, allow_lazy_initializer=False):
   return initializer(obj)
 
 
+upcasting_int_warnings_left = 3
+
+
+def add_grad_numpy_int_argument(left, right):
+  global upcasting_int_warnings_left
+  if upcasting_int_warnings_left:
+    print(
+        'WARNING: Automatically upcasting a temporary integer variable to '
+        'float. This may happen if you differentiate with respect to an '
+        'integer argument and may lead to unexpected results.')
+    upcasting_int_warnings_left -= 1
+  right = unbroadcast(numpy.array(right), left)
+  return left + right
+
+
 def add_grad_numpy(left, right):
   right = unbroadcast(numpy.array(right), left)
   return left + right
@@ -403,10 +447,6 @@ grad_adders = {
     (list, list): add_grad_list,
     (dict, dict): add_grad_dict,
     (numpy.ndarray, numpy.ndarray): add_grad_numpy,
-    (numpy.ndarray, float): add_grad_numpy,
-    (float, numpy.ndarray): add_grad_numpy,
-    (numpy.ndarray, numpy.float64): add_grad_numpy,
-    (numpy.float64, numpy.ndarray): add_grad_numpy,
     (numpy.ndarray, list): add_grad_numpy,
     (list, numpy.ndarray): add_grad_numpy,
     (bool, bool): lambda left, right: left or right,
@@ -428,11 +468,18 @@ def register_add_grad(left_type, right_type, add_grad_function):
     add_grad_function: A binary function that takes two arguments, left and
       right, of the types left_type and right_type respectively, and returns
       their sum. For example, the gradient adder for Numpy objects is np.add.
+
+  Raises:
+    ValueError: If the given type pair was already registered.
   """
-  grad_adders[(left_type, right_type)] = add_grad_function
+  key = (left_type, right_type)
+  if key in grad_adders:
+    raise ValueError('Types %s already mapped to %s' % (key, grad_adders[key]))
+  grad_adders[key] = add_grad_function
 
 
-def register_all_add_grad(add_grad_function, *types):
+def register_all_add_grad(
+    add_grad_function, arg_types, exclude=(), ignore_existing=False):
   """Register a gradient adder for all combinations of given types.
 
   This is a convenience shorthand for calling register_add_grad when registering
@@ -441,17 +488,34 @@ def register_all_add_grad(add_grad_function, *types):
 
   Args:
     add_grad_function: A gradient adder, see register_add_grad.
-    *types: Python type objects. The gradient adder will be registered for all
-      pairs of these types.
+    arg_types: List of Python type objects. The gradient adder will be
+      registered for all pairs of these types.
+    exclude: Optional list of type tuples to exclude.
+    ignore_existing: Boolean. Whether to silently skip argument pairs that were
+      already registered.
   """
-  for t1 in types:
-    for t2 in types:
+  for t1 in arg_types:
+    for t2 in arg_types:
+      if (t1, t2) in exclude:
+        continue
+      if ignore_existing and (t1, t2) in grad_adders:
+        continue
       register_add_grad(t1, t2, add_grad_function)
 
 
 register_all_add_grad(
     lambda left, right: left + right,
-    float, int, numpy.int64, numpy.float32, numpy.float64)
+    (float, numpy.float32, numpy.float64, numpy.ndarray),
+    exclude=((numpy.ndarray, numpy.ndarray),))
+
+
+register_all_add_grad(
+    add_grad_numpy_int_argument,
+    (float, int,
+     numpy.int32, numpy.int64, numpy.float32, numpy.float64,
+     numpy.ndarray),
+    exclude=((numpy.ndarray, numpy.ndarray),),
+    ignore_existing=True)
 
 
 def add_grad(left, right):
@@ -475,6 +539,101 @@ def add_grad(left, right):
   if right_type is ZeroGradient:
     return left
   return grad_adders[(left_type, right_type)](left, right)
+
+
+def array_shapes_match(a, b):
+  return numpy.shape(a) == numpy.shape(b)
+
+
+shape_checkers = {}
+
+
+def register_shape_checker(left_type, right_type, shape_checker_function):
+  """Register a new shape checking function supporting given types.
+
+  Shape checkers are primarily used to make sure that the seed derivatives
+  passed into generated autodiff functions match their corresponding
+  primal values.
+
+  Args:
+    left_type: A Python type object. The data type of the left operand
+      supported by the adder.
+    right_type: A Python type object. The data type of the right operand
+      supported by the adder.
+    shape_checker_function: A binary function that takes two arguments, left and
+      right, of the types left_type and right_type respectively, and returns
+      a boolean indicating whether or not they match.
+
+  Raises:
+    ValueError: If the given type pair was already registered.
+  """
+  key = (left_type, right_type)
+  if key in shape_checkers:
+    raise ValueError('Types %s already mapped to %s' % (key,
+                                                        shape_checkers[key]))
+  shape_checkers[key] = shape_checker_function
+
+
+def register_all_shape_checker(shape_checker_function,
+                               arg_types,
+                               exclude=(),
+                               ignore_existing=False):
+  """Register a gradient adder for all combinations of given types.
+
+  This is a convenience shorthand for calling register_add_grad when registering
+  gradient adders for multiple types that can be interchanged for the purpose
+  of addition.
+
+  Args:
+    shape_checker_function: A shape checker, see register_shape_checker.
+    arg_types: List of Python type objects. The shape checker will be
+      registered for all pairs of these types.
+    exclude: Optional list of type tuples to exclude.
+    ignore_existing: Boolean. Whether to silently skip argument pairs that were
+      already registered.
+  """
+  for t1 in arg_types:
+    for t2 in arg_types:
+      if (t1, t2) in exclude:
+        continue
+      if ignore_existing and (t1, t2) in shape_checkers:
+        continue
+      register_shape_checker(t1, t2, shape_checker_function)
+
+
+def shapes_match(a, b):
+  """Recursively check if shapes of object `a` and `b` match.
+
+  Will walk lists, tuples and dicts.
+
+  Args:
+    a: object of type (numpy.ndarray,tf.Tensor,list,tuple,dict)
+        to check for matching shapes against `b`.
+    b: object to check for matching shape against `a`.
+
+  Returns:
+    A boolean indicating whether the shapes of `a` and `b` match.
+  """
+  if isinstance(a, (tuple, list)) and isinstance(b, (tuple, list)):
+    if len(a) != len(b):
+      return False
+    return all([shapes_match(ia, ib) for ia, ib in zip(a, b)])
+  elif isinstance(a, dict) and isinstance(b, dict):
+    if len(a) != len(b):
+      return False
+    match = True
+    for (ak, av), (bk, bv) in zip(a.items(), b.items()):
+      match = match and all([ak == bk and shapes_match(av, bv)])
+    return match
+  else:
+    shape_checker = shape_checkers[(type(a), type(b))]
+    return shape_checker(a, b)
+
+
+register_all_shape_checker(
+    array_shapes_match, (numpy.ndarray, Number, float, int, numpy.float32,
+                         numpy.float64, numpy.int32, numpy.int64),
+    ignore_existing=True)
 
 
 def push(stack, x, op_id):
