@@ -435,6 +435,18 @@ def numpy_arctan(a):
   return np.arctan(a)
 
 
+def numpy_atleast_1d(x):
+  return np.sum(np.atleast_1d(x))
+
+
+def numpy_atleast_2d(x):
+  return np.sum(np.atleast_2d(x))
+
+
+def numpy_atleast_3d(x):
+  return np.sum(np.atleast_3d(x))
+
+
 # Label is 0 or 1
 
 
