@@ -14,7 +14,10 @@
 """Common kernels used by demos."""
 from __future__ import absolute_import
 
-import tensorflow as tf
+import os
+
+if not os.environ.get('USES_TORCH', False):
+  import tensorflow as tf
 
 
 def broadcast_update(d, **overrides):

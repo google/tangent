@@ -14,9 +14,15 @@
 """Common kernels used by demos."""
 from __future__ import absolute_import
 
+import os
+
 import autograd.numpy as np
-from tangent import dtype
-import tensorflow as tf
+
+if os.environ.get('USES_TORCH', False):
+  import torch
+else:
+  from tangent import dtype
+  import tensorflow as tf
 
 
 def moments(x, axis):
@@ -86,17 +92,17 @@ def dense(x, w, b):
 
 
 def sigmoid(logits):
-  return tf.divide(1.0, tf.add(1.0, tf.exp(tf.negative(logits))))
+  return 1.0 / (1.0 + tf.exp(-logits))
 
 
 def softmax(logits):
   exp_logits = tf.exp(logits)
-  return tf.divide(
-      exp_logits, tf.reduce_sum(exp_logits, axis=[-1], keep_dims=True))
+  sum_exp_logits = tf.reduce_sum(exp_logits, axis=[-1], keep_dims=True)
+  return exp_logits / (1e-8 + sum_exp_logits)
 
 
 def logsumexp(x, axis=None, keep_dims=False):
-  return tf.log(tf.reduce_sum(tf.exp(x), axis=axis, keep_dims=keep_dims))
+  return tf.log(1e-8 + tf.reduce_sum(tf.exp(x), axis=axis, keep_dims=keep_dims))
 
 
 def logsoftmax(logits):
@@ -109,7 +115,7 @@ def softmax_crossent(logits, y):
 
 
 def logsumexp_numpy(x, axis=None, keep_dims=False):
-  return np.log(np.sum(np.exp(x), axis=axis, keepdims=keep_dims))
+  return np.log(1e-8 + np.sum(np.exp(x), axis=axis, keepdims=keep_dims))
 
 
 def logsoftmax_numpy(logits):
@@ -118,3 +124,16 @@ def logsoftmax_numpy(logits):
 
 def softmax_crossent_numpy(logits, y):
   return -np.sum(logsoftmax_numpy(logits) * y, axis=-1)
+
+
+def logsumexp_pytorch(x, axis=None, keep_dims=False):
+  return torch.log(1e-8 + torch.sum(torch.exp(x), dim=axis, keepdim=keep_dims))
+
+
+def logsoftmax_pytorch(logits):
+  return logits - logsumexp_pytorch(logits, axis=-1, keep_dims=True)
+
+
+def softmax_crossent_pytorch(logits, y):
+  return -torch.sum(
+      logsoftmax_pytorch(logits) * y.type(torch.FloatTensor), dim=-1)

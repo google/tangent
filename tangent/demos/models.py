@@ -15,6 +15,7 @@
 from __future__ import absolute_import
 
 import math
+import os
 
 from tangent.demos.common_kernels import avgpool2d
 from tangent.demos.common_kernels import batch_norm
@@ -23,7 +24,8 @@ from tangent.demos.common_kernels import dense
 from tangent.demos.common_kernels import maxpool2d
 from tangent.demos.common_kernels import relu
 
-import tensorflow as tf
+if not os.environ.get('USES_TORCH', False):
+  import tensorflow as tf
 
 
 def stack_params(*params_list):

@@ -14,10 +14,17 @@
 """Simple model builders that have a very small number of parameters."""
 from __future__ import absolute_import
 
+import os
+
 import autograd.numpy as np
 from tangent.demos.common_kernels import softmax_crossent
 from tangent.demos.common_kernels import softmax_crossent_numpy
-import tensorflow as tf
+from tangent.demos.common_kernels import softmax_crossent_pytorch
+
+if os.environ.get('USES_TORCH', False):
+  import torch
+else:
+  import tensorflow as tf
 
 
 def mlp_numpy(x, w1, b1, wout, bout, label):
@@ -33,6 +40,16 @@ def mlp_tf(x, w1, b1, wout, bout, label):
   h1 = tf.tanh(tf.add(tf.matmul(x, w1), b1))
   out = tf.add(tf.matmul(h1, wout), bout)
   loss = tf.reduce_mean(softmax_crossent(out, label))
+  return loss
+
+
+def mlp_pytorch(x, w1, b1, wout, bout, label):
+  """Basic MLP demo, implemented in PyTorch. Equivalent with `mlp_numpy`."""
+  h1 = torch.tanh(x.mm(w1) + b1)
+  out = h1.mm(wout) + bout
+  # PyTorch does have its own implementation of cross entropy
+  # torch.nn.CrossEntropyLoss(), but we want a consistent implementation here.
+  loss = torch.mean(softmax_crossent_pytorch(out, label))
   return loss
 
 
@@ -68,6 +85,14 @@ def simple_loop_tf(x, num_steps):
     if tf.reduce_sum(x) > 1:
       x /= 2
   return tf.reduce_sum(x)
+
+
+def simple_loop_pytorch(x, num_steps):
+  for _ in range(num_steps):
+    # TODO: Is this really the best way to do it?
+    if (torch.sum(x) > 1).data[0]:
+      x /= 2
+  return torch.sum(x)
 
 
 def simple_loop_tf_pure(x, num_steps):
