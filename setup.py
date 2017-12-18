@@ -18,7 +18,7 @@ setup(
     url='https://github.com/google/tangent',
     license=lic,
     packages=find_packages(exclude=('tests')),
-    package_data={'':['README.md','LICENSE']},
+    package_data={'': ['README.md', 'LICENSE']},
     keywords=[
         'autodiff', 'automatic-differentiation', 'machine-learning',
         'deep-learning'
@@ -32,5 +32,6 @@ setup(
         'nose',
         'numpy',
         'six',
+        'termcolor',
         'tf-nightly>=1.5.0.dev20171026',
     ])
