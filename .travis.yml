@@ -7,7 +7,7 @@ python:
 install:
   - pip install -e .
   - pip install -r requirements.txt
-  - pip install pytest pytest-cov flake8
+  - pip install pytest pytest-cov flake8 pytest-faulthandler
 script:
   # stop the build if there are Python syntax errors or undefined names
   - flake8 . --builtins=d,tangent,numpy --count --exclude=tests --select=E901,E999,F821,F822,F823 --show-source --statistics
