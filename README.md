@@ -19,7 +19,7 @@ This project is an experimental release, and is under active development. As we 
 
 ## Usage
 
-Note: An interactive notebook with all the code in this page can be found [here](https://colab.research.google.com/notebook#fileId=1TDe5g25mhgtmPKbxOdwXlQ1pHm-VYFXB).
+Note: An interactive notebook with all the code in this page can be found [here](https://colab.research.google.com/notebook#fileId=1cjoX9GteBymbnqcikNMZP1uenMcwAGDe).
 
 Tangent has a one-function API:
 ```python
