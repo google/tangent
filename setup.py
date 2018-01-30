@@ -32,5 +32,5 @@ setup(
         'nose',
         'numpy',
         'six',
-        'tensorflow>=1.5.0',
+        'tf-nightly==1.5.0.dev20171026',
     ])
