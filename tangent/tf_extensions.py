@@ -71,7 +71,8 @@ register_all_add_grad(
 
 register_all_shape_checker(
     tensor_shapes_match,
-    (ops.EagerTensor, resource_variable_ops.ResourceVariable))
+    (ops.EagerTensor, resource_variable_ops.ResourceVariable, float, int),
+    ignore_existing=True)
 
 #
 # Utilities

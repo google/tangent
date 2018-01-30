@@ -276,21 +276,6 @@ def dot(y, x1, x2):
                                            numpy.transpose(x1)))
 
 
-@adjoint(numpy.atleast_1d)
-def atleast_1d(y, x):
-  d[x] = numpy.reshape(d[y], numpy.shape(x))
-
-
-@adjoint(numpy.atleast_2d)
-def atleast_2d(y, x):
-  d[x] = numpy.reshape(d[y], numpy.shape(x))
-
-
-@adjoint(numpy.atleast_3d)
-def atleast_3d(y, x):
-  d[x] = numpy.reshape(d[y], numpy.shape(x))
-
-
 @adjoint(numpy.reshape)
 def reshape(y, x, y_shape):
   d[x] = numpy.reshape(d[y], numpy.shape(x))

@@ -20,6 +20,7 @@ import astor
 import gast
 
 from tangent import annotations as anno
+from tangent.pretty_printer import dump  # pylint:disable=unused-import
 
 
 class TangentParseError(SyntaxError):
