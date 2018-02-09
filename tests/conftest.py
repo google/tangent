@@ -99,9 +99,11 @@ def pytest_generate_tests(metafunc):
   if 'n' in metafunc.fixturenames:
     metafunc.parametrize('n', integers)
 
-  vectors = [np.random.randn(i) for i in ((3,) if short else (3, 5, 10))]
-  if 'x' in metafunc.fixturenames:
-    metafunc.parametrize('x', vectors)
+  vector_names = ['x', 'x1', 'x2']
+  for vector_name in vector_names:
+    vectors = [np.random.randn(i) for i in ((3,) if short else (3, 5, 10))]
+    if vector_name in metafunc.fixturenames:
+      metafunc.parametrize(vector_name, vectors)
 
   square_matrices = [np.random.randn(*i) for i in (((3, 3),) if short else ((1, 1), (5, 5)))]
   if 'sqm' in metafunc.fixturenames:

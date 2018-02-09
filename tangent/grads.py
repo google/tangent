@@ -201,6 +201,128 @@ def uadd(y, x):
 #
 
 
+# TODO(alexbw): test
+@adjoint(numpy.radians)
+def radians(ans, x):
+  d[x] = d[ans] * np.pi / 180.0
+
+
+@adjoint(numpy.rad2deg)
+def rad2deg(ans, x):
+  d[x] = d[ans] / numpy.pi * 180.0
+
+
+@adjoint(numpy.degrees)
+def degrees(ans, x):
+  d[x] = d[ans] / numpy.pi * 180.0
+
+
+@adjoint(numpy.deg2rad)
+def deg2rad(ans, x):
+  d[x] = d[ans] * numpy.pi / 180.0
+
+
+@adjoint(numpy.square)
+def square(ans, x):
+  d[x] = d[ans] * 2 * x
+
+
+@adjoint(numpy.sinc)
+def sinc(ans, x):
+  d[x] = d[ans] * (numpy.cos(numpy.pi * x) * numpy.pi * x \
+                   - numpy.sin(numpy.pi * x)) / (numpy.pi * x * x)
+
+
+@adjoint(numpy.negative)
+def negative(ans, x):
+  d[x] = -d[ans]
+
+
+@adjoint(numpy.abs)
+def abs_(ans, x):
+  d[x] = d[ans] * tangent.replace_zero(numpy.conj(x),
+                                       0.) / tangent.replace_zero(ans, 1.)
+
+
+@adjoint(numpy.fabs)
+def fabs(ans, x):
+  d[x] = numpy.sign(x) * d[ans]  # fabs doesn't take complex numbers.
+
+
+@adjoint(numpy.absolute)
+def absolute(ans, x):
+  d[x] = d[ans] * numpy.conj(x) / ans
+
+
+@adjoint(numpy.reciprocal)
+def reciprocal(ans, x):
+  d[x] = -d[ans] / x**2
+
+
+@adjoint(numpy.power)
+def power(ans, x1, x2):
+  d[x1] = tangent.unbroadcast(d[ans] * x2 * x1 ** numpy.where(x2, x2 - 1, 1.0), x1)
+  d[x2] = tangent.unbroadcast(d[ans] * numpy.log(tangent.replace_zero(x1, 1.0)) * x1 ** x2, x2)
+
+@adjoint(numpy.arctan2)
+def arctan2(ans, x1, x2):
+  d[x1] = tangent.unbroadcast(d[ans] * x2 / (x1 ** 2.0 + x2 ** 2.0), x1)
+  d[x2] = tangent.unbroadcast(d[ans] * -x1 / (x1 ** 2.0 + x2 ** 2.0), x2)
+
+
+@adjoint(numpy.hypot)
+def hypot(ans, x1, x2):
+  d[x1] = tangent.unbroadcast(d[ans] * x1 / ans, x1)
+  d[x2] = tangent.unbroadcast(d[ans] * x2 / ans, x2)
+
+
+@adjoint(numpy.exp)
+def exp(ans, x):
+  d[x] = ans * d[ans]
+
+
+@adjoint(numpy.exp2)
+def exp2(ans, x):
+  d[x] = ans * numpy.log(2) * d[ans]
+
+
+@adjoint(numpy.expm1)
+def expm1(ans, x):
+  d[x] = (ans + 1) * d[ans]
+
+
+@adjoint(numpy.ldexp)
+def ldexp(ans, x1, x2):
+  d[x1] = tangent.unbroadcast(d[ans] * 2.0**x2, x1)
+  d[x2] = tangent.unbroadcast(d[ans] * numpy.log(2) * ans, x2)
+
+
+@adjoint(numpy.frexp)
+def frexp(ans, x):
+  dmantissa,dexp = d[ans]
+  d[x] = dmantissa / 2 ** numpy.ceil(numpy.log2(numpy.abs(x)))
+
+
+@adjoint(numpy.log)
+def log(ans, x):
+  d[x] = d[ans] / x
+
+
+@adjoint(numpy.log2)
+def log2(ans, x):
+  d[x] = d[ans] / x / numpy.log(2)
+
+
+@adjoint(numpy.log10)
+def log10(ans, x):
+  d[x] = d[ans] / x / numpy.log(10)
+
+
+@adjoint(numpy.log1p)
+def log1p(ans, x):
+  d[x] = d[ans] / (x + 1)
+
+
 @adjoint(numpy.log)
 def log(y, x):
   d[x] = d[y] / x
@@ -252,6 +374,21 @@ def arctan(y, x):
   d[x] = d[y] / (1.0 + x * x)
 
 
+@adjoint(numpy.arcsinh)
+def arcsinh(y, x):
+  d[x] = 1 / numpy.sqrt(x**2.0 + 1)
+
+
+@adjoint(numpy.arccosh)
+def arccosh(y, x):
+  d[x] = 1 / numpy.sqrt(x**2.0 - 1)
+
+
+@adjoint(numpy.arctanh)
+def arctanh(y, x):
+  d[x] = 1. / (1. - x**2.0)
+
+
 @adjoint(numpy.exp)
 def exp(y, x):
   d[x] = y * d[y]
@@ -264,8 +401,137 @@ def sqrt(y, x):
 
 @adjoint(numpy.multiply)
 def multiply(z, x, y):
-  d[x] = y * d[z]
-  d[y] = x * d[z]
+  d[x] = tangent.unbroadcast(y * d[z], x)
+  d[y] = tangent.unbroadcast(x * d[z], y)
+
+
+@adjoint(numpy.add)
+def add(ans, x, y):
+  d[x] = tangent.unbroadcast(d[ans], x)
+  d[y] = tangent.unbroadcast(d[ans], y)
+
+
+@adjoint(numpy.multiply)
+def multiply(ans, x, y):
+  d[x] = tangent.unbroadcast(y * d[ans], x)
+  d[y] = tangent.unbroadcast(x * d[ans], y)
+
+
+@adjoint(numpy.subtract)
+def subtract(ans, x, y):
+  d[x] = tangent.unbroadcast(d[ans], x)
+  d[y] = tangent.unbroadcast(-d[ans], y)
+
+
+@adjoint(numpy.divide)
+def divide(ans, x, y):
+  d[x] = tangent.unbroadcast(d[ans] / y, x)
+  d[y] = tangent.unbroadcast(-d[ans] * x / (y * y), y)
+
+
+@adjoint(numpy.maximum)
+def maximum(ans, x, y):
+  d[x] = tangent.unbroadcast(d[ans] * tangent.balanced_eq(x, ans, y), x)
+  d[y] = tangent.unbroadcast(d[ans] * tangent.balanced_eq(y, ans, x), y)
+
+
+@adjoint(numpy.minimum)
+def minimum(ans, x, y):
+  d[x] = tangent.unbroadcast(d[ans] * tangent.balanced_eq(x, ans, y), x)
+  d[y] = tangent.unbroadcast(d[ans] * tangent.balanced_eq(y, ans, x), y)
+
+
+@adjoint(numpy.fmax)
+def fmax(ans, x, y):
+  d[x] = tangent.unbroadcast(d[ans] * tangent.balanced_eq(x, ans, y), x)
+  d[y] = tangent.unbroadcast(d[ans] * tangent.balanced_eq(y, ans, x), y)
+
+
+@adjoint(numpy.fmin)
+def fmin(ans, x, y):
+  d[x] = tangent.unbroadcast(d[ans] * tangent.balanced_eq(x, ans, y), x)
+  d[y] = tangent.unbroadcast(d[ans] * tangent.balanced_eq(y, ans, x), y)
+
+
+@adjoint(numpy.max)
+def max_(ans, x, axis=None, keepdims=None):
+  d[x] = tangent.grad_chooser(d[ans], ans, x, axis=axis, keepdims=keepdims)
+
+
+@adjoint(numpy.min)
+def max_(ans, x, axis=None, keepdims=None):
+  d[x] = tangent.grad_chooser(d[ans], ans, x, axis=axis, keepdims=keepdims)
+
+
+@adjoint(numpy.amax)
+def max_(ans, x, axis=None, keepdims=None):
+  d[x] = tangent.grad_chooser(d[ans], ans, x, axis=axis, keepdims=keepdims)
+
+
+@adjoint(numpy.amin)
+def max_(ans, x, axis=None, keepdims=None):
+  d[x] = tangent.grad_chooser(d[ans], ans, x, axis=axis, keepdims=keepdims)
+
+
+@adjoint(numpy.median)
+def median_(ans, x, axis, keepdims=False):
+  d[x] = tangent.grad_chooser(d[ans], ans, x, axis=axis, keepdims=keepdims)
+
+
+@adjoint(numpy.nanmedian)
+def nanmedian_(ans, x, axis, keepdims=False):
+  d[x] = tangent.grad_chooser(d[ans], ans, x, axis=axis, keepdims=keepdims)
+
+
+@adjoint(numpy.nanmax)
+def nanmax_(ans, x, axis=None, keepdims=None):
+  d[x] = tangent.grad_chooser(d[ans], ans, x, axis=axis, keepdims=keepdims)
+
+
+@adjoint(numpy.nanmin)
+def nanmin_(ans, x, axis=None, keepdims=None):
+  d[x] = tangent.grad_chooser(d[ans], ans, x, axis=axis, keepdims=keepdims)
+
+
+@adjoint(numpy.logaddexp)
+def logaddexp(ans, x, y):
+  d[x] = tangent.unbroadcast(d[ans] * numpy.exp(x - ans), x)
+  d[y] = tangent.unbroadcast(d[ans] * numpy.exp(y - ans), y)
+
+
+@adjoint(numpy.logaddexp2)
+def logaddexp2(ans, x, y):
+  d[x] = tangent.unbroadcast(d[ans] * 2**(x - ans), x)
+  d[y] = tangent.unbroadcast(d[ans] * 2**(y - ans), y)
+
+
+@adjoint(numpy.true_divide)
+def true_divide(ans, x, y):
+  d[x] = tangent.unbroadcast(d[ans] / y, x)
+  d[y] = tangent.unbroadcast(-d[ans] * x / (y * y), y)
+
+
+@adjoint(numpy.mod)
+def mod(ans, x, y):
+  d[x] = tangent.unbroadcast(d[ans], x)
+  d[y] = tangent.unbroadcast(-d[ans] * numpy.floor(x / y), y)
+
+
+@adjoint(numpy.fmod)
+def fmod(ans, x, y):
+  d[x] = tangent.unbroadcast(d[ans], x)
+  d[y] = tangent.unbroadcast(-d[ans] * numpy.round(x / y), y)
+
+
+@adjoint(numpy.remainder)
+def remainder(ans, x, y):
+  d[x] = tangent.unbroadcast(d[ans], x)
+  d[y] = tangent.unbroadcast(-d[ans] * numpy.floor(x / y), y)
+
+
+@adjoint(numpy.nan_to_num)
+def nan_to_num(ans, x):
+  d[x] = numpy.where(numpy.isfinite(x), d[ans], 0.)
 
 
 @adjoint(numpy.dot)
@@ -276,24 +542,21 @@ def dot(y, x1, x2):
                                            numpy.transpose(x1)))
 
 
-@adjoint(numpy.atleast_1d)
-def atleast_1d(y, x):
-  d[x] = numpy.reshape(d[y], numpy.shape(x))
+@adjoint(numpy.cross)
+def cross(ans, a, b, axisa=-1, axisb=-1, axisc=-1, axis=None):
+  d[a] = numpy.cross(b, d[ans], axisb, axisc, axisa, axis)
+  d[b] = numpy.cross(d[ans], a, axisc, axisa, axisb, axis)
 
 
-@adjoint(numpy.atleast_2d)
-def atleast_2d(y, x):
-  d[x] = numpy.reshape(d[y], numpy.shape(x))
-
-
-@adjoint(numpy.atleast_3d)
-def atleast_3d(y, x):
-  d[x] = numpy.reshape(d[y], numpy.shape(x))
+@adjoint(numpy.linspace)
+def linspace(ans, start, stop, num):
+  d[start] = numpy.dot(numpy.linspace(1.0, 0.0, num), d[ans])
+  d[stop] = numpy.dot(numpy.linspace(0.0, 1.0, num), d[ans])
 
 
 @adjoint(numpy.reshape)
-def reshape(y, x, y_shape):
-  d[x] = numpy.reshape(d[y], numpy.shape(x))
+def reshape(y, x, y_shape, order=None):
+  d[x] = numpy.reshape(d[y], numpy.shape(x), order=order)
 
 
 @adjoint(numpy.transpose)
@@ -307,10 +570,21 @@ def broadcast_arrays(ys, *args):
                   for arg, dy in zip(args, d[ys]))
 
 
+@adjoint(numpy.cumsum)
+def cumsum(ans, a, axis=None):
+  d[a] = tangent.grad_cumsum(d[ans], ans, a, axis=axis)
+
+
 @adjoint(numpy.sum)
-def sum(y, x, axis=None, dtype=None, keepdims=False):
+def sum_(y, x, axis=None, dtype=None, keepdims=False):
   d[x] = tangent.astype(tangent.unreduce(d[y], numpy.shape(x),
                                          axis, keepdims), x)
+
+
+@adjoint(numpy.nansum)
+def nansum(y, x, axis=None, dtype=None, keepdims=False):
+  d[x] = tangent.astype(
+      tangent.unreduce(d[y], numpy.shape(x), axis, keepdims), x)
 
 
 @adjoint(numpy.mean)
@@ -320,15 +594,56 @@ def mean(y, x, axis=None, dtype=None, keepdims=False):
                                          axis, keepdims), x) / n
 
 
+@adjoint(numpy.nanmean)
+def mean(y, x, axis=None, dtype=None, keepdims=False):
+  n = tangent.astype(tangent.array_size(x, axis), x)
+  d[x] = tangent.astype(
+      tangent.unreduce(d[y], numpy.shape(x), axis, keepdims), x) / n
+
+
+@adjoint(numpy.var)
+def var(ans, x, axis=None, ddof=0, keepdims=False):
+  d[x] = tangent.grad_var(
+      d[ans], ans, x, axis=axis, ddof=ddof, keepdims=keepdims)
+
+
+@adjoint(numpy.std)
+def std(ans, x, axis=None, ddof=0, keepdims=False):
+  d[x] = tangent.grad_std(
+      d[ans], ans, x, axis=axis, ddof=ddof, keepdims=keepdims)
+
+
+@adjoint(numpy.nanvar)
+def var(ans, x, axis=None, ddof=0, keepdims=False):
+  d[x] = tangent.grad_var(
+      d[ans], ans, x, axis=axis, ddof=ddof, keepdims=keepdims)
+
+
+@adjoint(numpy.nanstd)
+def std(ans, x, axis=None, ddof=0, keepdims=False):
+  d[x] = tangent.grad_std(
+      d[ans], ans, x, axis=axis, ddof=ddof, keepdims=keepdims)
+
+
 @adjoint(numpy.maximum)
 def maximum(ans, x, y):
-  d[x] = d[ans] * tangent.balanced_eq(x, ans, y)
-  d[y] = d[ans] * tangent.balanced_eq(y, ans, x)
+  d[x] = tangent.unbroadcast(d[ans] * tangent.balanced_eq(x, ans, y), x)
+  d[y] = tangent.unbroadcast(d[ans] * tangent.balanced_eq(y, ans, x), y)
 
 
 @adjoint(numpy.array)
 def aarray(ans,x):
   d[x] = tangent.astype(d[ans],x)
+
+
+@adjoint(numpy.concatenate)
+def concatenate(ans, arrays, axis=0):
+  d[arrays] = tangent.unconcatenate(d[ans], d[arrays], axis=axis)
+
+
+# @adjoint(numpy.inner)
+# def inner(ans, a, b):
+#   pass
 
 
 @adjoint(numpy.linalg.det)
@@ -337,13 +652,359 @@ def adet(z, x):
 
   See  Jacobi's formula: https://en.wikipedia.org/wiki/Jacobi%27s_formula
   """
-  adjugate = numpy.linalg.det(x) * numpy.linalg.pinv(x)
+  adjugate = z * numpy.linalg.pinv(x)
   d[x] = d[z] * numpy.transpose(adjugate)
 
+
+@adjoint(numpy.clip)
+def clip(ans, x, a_min, a_max):
+  d[x] = d[ans] * numpy.logical_and(ans != a_min, ans != a_max)
+
+
+@adjoint(numpy.real_if_close)
+def real_if_close(ans, x):
+  d[x] = tangent.match_complex(x, d[ans])
+
+
+@adjoint(numpy.real)
+def real(ans, x):
+  d[x] = tangent.match_complex(x, d[ans])
+
+
+@adjoint(numpy.imag)
+def imag(ans, x):
+  d[x] = tangent.match_complex(x, -1j * d[ans])
+
+
+@adjoint(numpy.conj)
+def conj(ans, x):
+  d[x] = numpy.conj(d[ans])
+
+
+@adjoint(numpy.conjugate)
+def conjugate(ans, x):
+  d[x] = numpy.conj(d[ans])
+
+
+@adjoint(numpy.angle)
+def angle(ans, x):
+  d[x] = tangent.match_complex(x, d[ans] * numpy.conj(x * 1j) / numpy.abs(x)**2)
+
+
+#
+# NumPy shape manipulation adjoints
+#
+
+
+@adjoint(numpy.full)
+def full(ans, shape, fill_value):
+  d[fill_value] = numpy.sum(d[ans])
+
+
+@adjoint(numpy.full_like)
+def full_like(ans, array_like, fill_value):
+  d[fill_value] = numpy.sum(d[ans])
+
+
+@adjoint(numpy.asarray)
+def asarray(ans, array):
+  d[array] = tangent.astype(d[ans], array)
+
+
+@adjoint(numpy.roll)
+def roll(ans, a, shift, axis=None):
+  d[a] = numpy.roll(d[ans], -shift, axis=axis)
+
+
+@adjoint(numpy.rollaxis)
+def rollaxis(ans, a, axis, start=0):
+  if start > axis:
+    d[a] = numpy.rollaxis(d[ans], start - 1, axis)
+  else:
+    d[a] = numpy.rollaxis(d[ans], start, axis + 1)
+
+
+@adjoint(numpy.moveaxis)
+def moveaxis(ans, array, source, destination):
+  d[array] = numpy.moveaxis(d[ans], destination, source)
+
+
+# @adjoint(numpy.take)
+# def take(ans, a, indices, axis=None):
+#   pass
+
+# @adjoint(numpy.choose)
+# def choose(ans, ...):
+#   pass
+
+
+@adjoint(numpy.repeat)
+def repeat(ans, x, repeats, axis=None):
+  shape = numpy.shape(x)
+  if axis == None:
+    expanded = numpy.reshape(d[ans], (numpy.prod(shape),) + (repeats,))
+  pass
+
+
+# @adjoint(numpy.put)
+# def put(ans, ...):
+#   pass
+
+
+@adjoint(numpy.swapaxes)
+def swapaxes(ans, x, axis1, axis2):
+  d[x] = numpy.swapaxes(d[ans], axis2, axis1)
+
+
+# @adjoint(numpy.partition)
+# def partition(ans, ...):
+#   pass
+
+# @adjoint(numpy.sort)
+# def sort(ans, ...):
+#   pass
+
+# @adjoint(numpy.resize)
+# def resize(ans, ...):
+#   pass
+
+
+@adjoint(numpy.squeeze)
+def squeeze(ans, x, axis=None):
+  d[x] = numpy.reshape(d[ans], numpy.shape(x))
+
+
+@adjoint(numpy.diagonal)
+def diagonal(ans, a):
+  d[a] = tangent.make_diagonal(d[ans])
+
+
+# @adjoint(numpy.pad)
+# def pad(ans, ...):
+#   pass
+
+
+@adjoint(numpy.ravel)
+def ravel(ans, a):
+  d[a] = numpy.reshape(d[ans], numpy.shape(d[a]))
+
+
+# @adjoint(numpy.compress)
+# def compress(ans, ...):
+#   pass
+
+# @adjoint(numpy.fill_diagonal)
+# def fill_diagonal(ans, ...):
+#   pass
+
+
+@adjoint(numpy.expand_dims)
+def expand_dims(ans, x, axis):
+  d[x] = numpy.reshape(d[ans], numpy.shape(x))
+
+
+# TODO(alexbw): going back to 2D might be problematic, should explicitly reshape!
+@adjoint(numpy.column_stack)
+def column_stack(ans, tup):
+  d[tup] = tangent.unconcatenate(d[ans], d[tup], axis=1)
+
+
+@adjoint(numpy.row_stack)
+def row_stack(ans, tup):
+  d[tup] = tangent.unconcatenate(d[ans], d[tup], axis=0)
+
+
+@adjoint(numpy.array_split)
+def array_split(ans, ary, indices_or_sections, axis=0):
+  d[ary] = np.concatenate(d[ans], axis=axis)
+
+
+@adjoint(numpy.split)
+def split(ans, ary, indices_or_sections, axis=0):
+  d[ary] = np.concatenate(d[ans], axis=axis)
+
+
+@adjoint(numpy.hsplit)
+def hsplit(ans, ary, indices_or_sections):
+  d[ary] = np.concatenate(d[ans], axis=1)
+
+
+@adjoint(numpy.vsplit)
+def vsplit(ans, ary, indices_or_sections):
+  d[ary] = np.concatenate(d[ans], axis=0)
+
+
+@adjoint(numpy.dsplit)
+def dsplit(ans, ary, indices_or_sections):
+  d[ary] = np.concatenate(d[ans], axis=2)
+
+
+# @adjoint(numpy.kron)
+# def kron(ans, ...):
+#   pass
+
+# @adjoint(numpy.tile)
+# def tile(ans, ...):
+#   pass
+
+
+@adjoint(numpy.atleast_1d)
+def atleast_1d(ans, array):
+  d[array] = numpy.reshape(d[ans], numpy.shape(d[array]))
+
+
+@adjoint(numpy.atleast_2d)
+def atleast_2d(ans, array):
+  d[array] = numpy.reshape(d[ans], numpy.shape(d[array]))
+
+
+@adjoint(numpy.atleast_3d)
+def atleast_3d(ans, array):
+  d[array] = numpy.reshape(d[ans], numpy.shape(d[array]))
+
+
+@adjoint(numpy.vstack)
+def vstack(ans, arrays):
+  d[arrays] = tangent.unconcatenate(d[ans], d[arrays], axis=0)
+
+
+@adjoint(numpy.hstack)
+def hstack(ans, arrays):
+  d[arrays] = tangent.unconcatenate(d[ans], d[arrays], axis=1)
+
+
+@adjoint(numpy.dstack)
+def dstack(ans, arrays):
+  d[arrays] = tangent.unconcatenate(d[ans], d[arrays], axis=2)
+
+
+@adjoint(numpy.stack)
+def stack(ans, arrays, axis=0):
+  d[arrays] = tangent.unconcatenate(d[ans], d[arrays], axis=axis)
+
+
+# @adjoint(numpy.trace)
+# def trace(ans, ...):
+#   pass
+
+
+@adjoint(numpy.where)
+def where(ans, c, x, y):
+  d[x] = numpy.where(c, d[ans], numpy.zeros_like(d[ans]))
+  d[y] = numpy.where(c, numpy.zeros_like(d[ans]), d[ans])
+
+
+# @adjoint(numpy.correlate)
+# def correlate(ans, ...):
+#   pass
+
+# @adjoint(numpy.convolve)
+# def convolve(ans, ...):
+#   pass
+
+
+@adjoint(numpy.fliplr)
+def fliplr(ans, x):
+  d[x] = numpy.fliplr(d[ans])
+
+
+@adjoint(numpy.flipud)
+def flipud(ans, x):
+  d[x] = numpy.flipud(d[ans])
+
+
+@adjoint(numpy.rot90)
+def rot90(ans, x, k=1):
+  d[x] = numpy.rot90(d[ans], k=-k)
+
+
+@adjoint(numpy.diag)
+def diag(ans, x, k=0):
+  d[x] = numpy.diag(d[ans], k)
+
+
+# @adjoint(numpy.diagflat)
+# def diagflat(ans, ...):
+#   pass
+
+
+@adjoint(numpy.tril)
+def tril(ans, x, k=0):
+  d[x] = numpy.tril(d[ans], k=k)
+
+
+@adjoint(numpy.triu)
+def triu(ans, x, k=0):
+  d[x] = numpy.triu(d[ans], k=k)
+
+
+# @adjoint(numpy.unique)
+# def unique(ans, ...):
+#   pass
+
+# @adjoint(numpy.intersect1d)
+# def intersect1d(ans, ...):
+#   pass
+#
+#
+# @adjoint(numpy.setxor1d)
+# def setxor1d(ans, ...):
+#   pass
+#
+#
+# @adjoint(numpy.union1d)
+# def union1d(ans, ...):
+#   pass
+#
+#
+# @adjoint(numpy.setdiff1d)
+# def setdiff1d(ans, ...):
+#   pass
+#
+#
+# @adjoint(numpy.ediff1d)
+# def ediff1d(ans, ...):
+#   pass
+#
+#
+# @adjoint(numpy.select)
+# def select(ans, ...):
+#   pass
+
+
+@adjoint(numpy.copy)
+def copy(ans, a):
+  d[a] = numpy.copy(d[ans])
+
+
+# @adjoint(numpy.delete)
+# def delete(ans, arr, obj, axis=None):
+#   pass
+
+# @adjoint(numpy.insert)
+# def insert(ans, ...):
+#   pass
+
+# @adjoint(numpy.append)
+# def append(ans, ...):
+#   pass
+#
+#
+# @adjoint(numpy.extract)
+# def extract(ans, ...):
+#   pass
+#
+#
+# @adjoint(numpy.trim_zeros)
+# def trim_zeros(ans, ...):
+#   pass
 
 #
 # Tangent adjoints
 #
+
+
+
 
 
 @adjoint(tangent.unreduce)

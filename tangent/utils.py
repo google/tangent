@@ -77,6 +77,20 @@ unbroadcasters = {
         lambda array, like: array,
     numpy.float64:
         lambda array, like: array,
+    numpy.int16:
+        lambda array, like: array,
+    numpy.int32:
+        lambda array, like: array,
+    numpy.int64:
+        lambda array, like: array,
+    numpy.uint8:
+        lambda array, like: array,
+    numpy.uint16:
+        lambda array, like: array,
+    numpy.uint32:
+        lambda array, like: array,
+    numpy.uint64:
+        lambda array, like: array,
     float:
         lambda array, like: array,
     int:
@@ -86,11 +100,12 @@ unbroadcasters = {
 }
 
 
+
 def register_unbroadcast(t, unbroadcaster_function):
   """Register a new unbroadcaster.
 
-  Unbroadcasters are used to undo broadcasting, e.g. np.eye(3) + 3
-  will broadcast 3 to np.shape(np.eye(3)). In the backward pass, we have to
+  Unbroadcasters are used to undo broadcasting, e.g. numpy.eye(3) + 3
+  will broadcast 3 to numpy.shape(numpy.eye(3)). In the backward pass, we have to
   undo this.
 
   Args:
@@ -244,7 +259,7 @@ unreducers = {
 def register_unreduce(t, unreducer_function):
   """Register a new unreducer.
 
-  Unreducers are used to undo reduction, e.g. np.sum(np.eye(3))
+  Unreducers are used to undo reduction, e.g. numpy.sum(numpy.eye(3))
   will reduce a (3,3) array to a scalar. In the backward pass, we have to
   undo this.
 
@@ -286,6 +301,55 @@ def balanced_eq(x, z, y):
     equal and 0 if it was not the maximum.
   """
   return (x == z) / (1.0 + (x == y))
+
+
+def replace_zero(x, val):
+  return numpy.where(x, x, val)
+
+
+def grad_chooser(d_ans, ans, x, axis=None, keepdims=None):
+  d_repeated_ = astype(unreduce(d_ans, numpy.shape(x), axis, keepdims), x)
+  mask_ = x == unreduce(ans, numpy.shape(x), axis, keepdims)
+  out = d_repeated_ * mask_ \
+    / numpy.sum(mask_, axis=axis, keepdims=True)
+
+
+def reverse_axis(x, axis):
+  y = numpy.swapaxes(x, axis, 0)
+  z = y[::-1, ...]
+  return numpy.swapaxes(z, 0, axis)
+
+
+def grad_cumsum(d_ans, ans, x, axis=None):
+  if axis:
+    out = reverse_axis(numpy.cumsum(reverse_axis(d_ans, axis), axis), axis)
+  else:
+    out = numpy.reshape(numpy.cumsum(d_ans[::-1], axis)[::-1], numpy.shape(x))
+  return out
+
+
+def grad_var(d_ans, ans, x, axis=None, ddof=0, keepdims=False):
+  num_reps = astype(array_size(x, axis), x)
+  if numpy.any(numpy.iscomplex(x)):
+    d_ans = d_ans + 0j
+  d_ans_repeated = unbroadcast(d_ans, x)
+  x_minus_mean = numpy.conj(x - numpy.mean(x, axis=axis, keepdims=True))
+  out = 2.0 * d_ans_repeated * x_minus_mean / (num_reps - ddof)
+  return out
+
+
+def grad_std(d_ans, ans, x, axis=None, ddof=0, keepdims=False):
+  num_reps = astype(array_size(x, axis), x)
+  if numpy.any(numpy.iscomplex(x)):
+    d_ans = d_ans + 0j
+  if num_reps <= 1:
+    d_ans[:] *= 0
+    out = d_ans
+  else:
+    d_ans_repeated = unbroadcast(d_ans / ans, x)
+    x_minus_mean = numpy.conj(x - numpy.mean(x, axis=axis, keepdims=True))
+    out = d_ans_repeated * x_minus_mean / (num_reps - ddof)
+  return out
 
 
 def init_common_object(obj):
@@ -467,7 +531,7 @@ def register_add_grad(left_type, right_type, add_grad_function):
       supported by the adder.
     add_grad_function: A binary function that takes two arguments, left and
       right, of the types left_type and right_type respectively, and returns
-      their sum. For example, the gradient adder for Numpy objects is np.add.
+      their sum. For example, the gradient adder for Numpy objects is numpy.add.
 
   Raises:
     ValueError: If the given type pair was already registered.
@@ -773,6 +837,35 @@ def grad_dot(dy, x1, x2):
       numpy.sum(x2, axis=tuple(numpy.arange(numpy.ndim(x2) - 2)))))
   dy_x2 = numpy.sum(dy, axis=tuple(-numpy.arange(numpy.ndim(x2) - 2) - 2))
   return numpy.reshape(numpy.dot(dy_x2, x2_t), numpy.shape(x1))
+
+
+def unconcatenate(ans, arrays, axis=0):
+  sizes = [numpy.shape(a)[axis] for a in arrays]
+  split_idx = numpy.cumsum(sizes)[:-1]
+  return numpy.array_split(ans, split_idx, axis=axis)
+
+
+def match_complex(target, x):
+  target_iscomplex = numpy.iscomplexobj(target)
+  x_iscomplex = numpy.iscomplexobj(x)
+  if x_iscomplex and not target_iscomplex:
+    out = numpy.real(x)
+  elif not x_iscomplex and target_iscomplex:
+    out = x + 0j
+  else:
+    out = x
+  return out
+
+
+def make_diagonal(mat):
+  """Port of make_diagonal from autograd."""
+  # We use a trick: calling numpy.diagonal returns a view on the original array,
+  # so we can modify it in-place. (only valid for numpy version >= 1.10.)
+  new_array = numpy.zeros(numpy.shape(mat) + (numpy.shape(mat)[-1],))
+  new_array_diag = numpy.diagonal(new_array, offset=0, axis1=-1, axis2=-2)
+  new_array_diag.flags.writeable = True
+  new_array_diag[:] = mat
+  return new_array
 
 
 def copy(source):

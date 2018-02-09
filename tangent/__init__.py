@@ -27,16 +27,24 @@ from tangent.utils import array_size
 from tangent.utils import astype
 from tangent.utils import balanced_eq
 from tangent.utils import copy
+from tangent.utils import grad_chooser
+from tangent.utils import grad_cumsum
 from tangent.utils import grad_dot
+from tangent.utils import grad_std
+from tangent.utils import grad_var
 from tangent.utils import init_grad
 from tangent.utils import insert_grad_of
+from tangent.utils import make_diagonal
+from tangent.utils import match_complex
 from tangent.utils import pop
 from tangent.utils import pop_stack
 from tangent.utils import push
 from tangent.utils import push_stack
+from tangent.utils import replace_zero
 from tangent.utils import shapes_match
 from tangent.utils import Stack
 from tangent.utils import unbroadcast
+from tangent.utils import unconcatenate
 from tangent.utils import unreduce
 from tangent.utils import unreduce_like
 

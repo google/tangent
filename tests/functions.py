@@ -383,6 +383,22 @@ def numpy_mean(x):
   return np.mean(x)
 
 
+def numpy_var(x):
+  return np.var(x)
+
+
+def numpy_std(x):
+  return np.std(x)
+
+
+def numpy_nanvar(x):
+  return np.nanvar(x)
+
+
+def numpy_nanstd(x):
+  return np.nanstd(x)
+
+
 def numpy_exp(a):
   return np.exp(a)
 
@@ -391,12 +407,99 @@ def numpy_exp2(a):
   return np.exp(np.exp(a))
 
 
+def numpy_expm1(a):
+  return np.expm1(a)
+
+
+def numpy_ldexp(a, n):
+  return np.ldexp(a, n)
+
+
+def numpy_frexp(x):
+  mantissa, exponent = np.frexp(x)
+  return np.sum(mantissa)
+
+
+def numpy_log(a):
+  return np.log(a)
+
+
+def numpy_log2(a):
+  return np.log2(a)
+
+
+def numpy_log10(a):
+  return np.log10(a)
+
+
+def numpy_log1p(a):
+  return np.log1p(a)
+
+
 def numpy_sqrt(a):
   if a >= 0:
     r = np.sqrt(a)
   else:
     r = np.sqrt(-a)
   return r
+
+
+def numpy_negative(a):
+  return np.negative(a)
+
+
+def numpy_reciprocal(a):
+  return np.reciprocal(a)
+
+
+def numpy_add(a, b):
+  return np.add(a, b)
+
+
+def numpy_logaddexp(a, b):
+  return np.logaddexp(a, b)
+
+
+def numpy_logaddexp2(a, b):
+  return np.logaddexp2(a, b)
+
+
+def numpy_subtract(a, b):
+  return np.subtract(a, b)
+
+
+def numpy_divide(a, b):
+  return np.divide(a, b)
+
+
+def numpy_true_divide(a, b):
+  return np.true_divide(a, b)
+
+
+def numpy_mod(a, b):
+  return np.mod(a, b)
+
+
+def numpy_fmod(a, b):
+  return np.fmod(a, b)
+
+
+def numpy_remainder(a, b):
+  return np.remainder(a, b)
+
+
+def numpy_cross(x1, x2):
+  a = x1[:3]
+  b = x2[:3]
+  return np.sum(np.cross(a, b))
+
+
+def numpy_linspace(a):
+  return np.sum(np.linspace(0, a, 100))
+
+
+def numpy_cumsum(x):
+  return np.sum(np.cumsum(x))
 
 
 def numpy_cos(a):
@@ -423,29 +526,374 @@ def numpy_tanh(a):
   return np.tanh(a)
 
 
-def numpy_arccos(a):
-  return np.arccos(a)
+def numpy_arccos(x):
+  return np.sum(np.arccos(np.clip(x,-1,1)))
 
 
-def numpy_arcsin(a):
-  return np.arcsin(a)
+def numpy_arcsin(x):
+  return np.sum(np.arcsin(np.clip(x,-1,1)))
+
+
+def numpy_sinc(a):
+  return np.sinc(a)
 
 
 def numpy_arctan(a):
   return np.arctan(a)
 
 
-def numpy_atleast_1d(x):
-  return np.sum(np.atleast_1d(x))
+def numpy_arcsinh(a):
+  return np.arcsinh(a)
 
 
-def numpy_atleast_2d(x):
-  return np.sum(np.atleast_2d(x))
+def numpy_arccosh(a):
+  return np.arccosh(a)
 
 
-def numpy_atleast_3d(x):
-  return np.sum(np.atleast_3d(x))
+def numpy_arctanh(x):
+  return np.sum(np.arctanh(np.clip(x,-1,1)))
 
+
+def numpy_radians(a):
+  return np.radians(a)
+
+
+def numpy_rad2deg(a):
+  return np.rad2deg(a)
+
+
+def numpy_degrees(a):
+  return np.degrees(a)
+
+
+def numpy_deg2rad(a):
+  return np.deg2rad(a)
+
+
+def numpy_square(a):
+  return np.square(a)
+
+
+def numpy_abs(x):
+  return np.sum(np.abs(x))
+
+
+def numpy_fabs(x):
+  return np.sum(np.fabs(x))
+
+
+# TODO(alexbw): test with complex values
+def numpy_absolute(x):
+  return np.sum(np.absolute(x))
+
+
+def numpy_arctan2(a, b):
+  return np.arctan2(a, b)
+
+
+def numpy_hypot(a, b):
+  return np.hypot(a, b)
+
+
+def numpy_maximum(x1, x2):
+  return np.maximum(x1, x2)
+
+
+def numpy_minimum(x1, x2):
+  return np.minimum(x1, x2)
+
+
+def numpy_fmax(x1, x2):
+  return np.fmax(x1, x2)
+
+
+def numpy_fmin(x1, x2):
+  return np.fmin(x1, x2)
+
+
+def numpy_max1(sqm):
+  return np.max(sqm)
+
+
+def numpy_max2(sqm):
+  return np.sum(np.max(sqm, axis=0))
+
+
+def numpy_min1(sqm):
+  return np.min(sqm)
+
+
+def numpy_min2(sqm):
+  return np.sum(np.min(sqm, axis=0))
+
+
+def numpy_median1(sqm):
+  return np.median(sqm)
+
+
+def numpy_median2(sqm):
+  return np.sum(np.median(sqm, axis=0))
+
+
+# def numpy_inner(x):
+#   return np.sum(np.inner(x, x))
+
+
+def numpy_full(a):
+  return np.sum(np.full((3, 3), a))
+
+
+def numpy_full_like(a):
+  array = np.eye(3)
+  return np.sum(np.full_like(array, a))
+
+
+def numpy_asarray(x):
+  return np.sum(np.array(x))
+
+
+def numpy_roll1(x):
+  return np.sum(np.roll(x, 1))
+
+
+def numpy_roll2(x):
+  return np.roll(x, 1)[0]
+
+
+def numpy_rollaxis(sqm):
+  return np.sum(np.rollaxis(sqm, 1, 0)[0])
+
+
+def numpy_moveaxis(sqm):
+  return np.sum(np.moveaxis(sqm, 1, 0)[0])
+
+
+# def numpy_take(...):
+#   return np.take(...)
+#
+#
+# def numpy_choose(...):
+#   return np.choose(...)
+#
+#
+def numpy_repeat(sqm):
+  return np.sum(np.repeat(sqm, 3, 0))
+
+
+#
+#
+# def numpy_put(...):
+#   return np.put(...)
+
+
+def numpy_swapaxes(sqm):
+  return np.sum(np.swapaxes(sqm, 1, 0))
+
+
+# def numpy_partition(...):
+#   return np.partition(...)
+#
+#
+# def numpy_sort(...):
+#   return np.sort(...)
+#
+#
+# def numpy_resize(...):
+#   return np.resize(...)
+
+
+def numpy_squeeze(x):
+  return np.sum(np.squeeze(np.atleast_2d(x)))
+
+
+def numpy_diagonal(sqm):
+  return np.sum(np.diagonal(sqm))
+
+
+# def numpy_pad(...):
+#   return np.pad(...)
+
+
+def numpy_ravel(sqm):
+  return np.sum(np.ravel(sqm))
+
+
+# def numpy_compress(...):
+#   return np.compress(...)
+#
+#
+# def numpy_fill_diagonal(...):
+#   return np.fill_diagonal(...)
+
+
+def numpy_expand_dims(x):
+  return np.sum(np.expand_dims(x, 1))
+
+
+def numpy_column_stack(x):
+  return np.sum(np.column_stack((x, x)))
+
+
+def numpy_row_stack(x):
+  return np.sum(np.row_stack((x, x)))
+
+
+def numpy_array_split(sqm):
+  return np.sum(np.array_split(sqm, 3)[0])
+
+
+def numpy_split(sqm):
+  return np.sum(np.split(sqm, 3)[0])
+
+
+def numpy_hsplit(sqm):
+  return np.sum(np.hsplit(sqm, 3)[0])
+
+
+def numpy_vsplit(sqm):
+  return np.sum(np.vsplit(sqm, 3)[0])
+
+
+def numpy_dsplit(sqm):
+  m = np.swapaxes(np.atleast_3d(sqm), 2, 0)
+  return np.sum(np.dsplit(m, 3)[0])
+
+
+# def numpy_kron(...):
+#   return np.kron(...)
+#
+#
+# def numpy_tile(...):
+#   return np.tile(...)
+#
+
+
+def numpy_atleast_1d(sqm):
+  return np.sum(np.atleast_1d(sqm))
+
+
+def numpy_atleast_2d(sqm):
+  return np.sum(np.atleast_2d(sqm))
+
+
+def numpy_atleast_3d(sqm):
+  return np.sum(np.atleast_3d(sqm))
+
+
+def numpy_concatenate(sqm):
+  return np.sum(np.concatenate([sqm, sqm]))
+
+
+def numpy_dstack(sqm):
+  return np.sum(np.dstack([sqm, sqm]))
+
+
+def numpy_hstack(sqm):
+  return np.sum(np.hstack([sqm, sqm]))
+
+
+def numpy_vstack(sqm):
+  return np.sum(np.vstack([sqm, sqm]))
+
+
+def numpy_stack(sqm):
+  return np.sum(np.stack([sqm, sqm]))
+
+
+# def numpy_trace(...):
+#   return np.trace(...)
+
+
+def numpy_where(x1, x2):
+  return np.sum(np.where(x1 > 0, x1, x2))
+
+
+# def numpy_correlate(...):
+#   return np.correlate(...)
+#
+#
+# def numpy_convolve(...):
+#   return np.convolve(...)
+
+
+def numpy_fliplr(sqm):
+  return np.sum(np.fliplr(sqm))
+
+
+def numpy_flipud(sqm):
+  return np.sum(np.flipud(sqm))
+
+
+def numpy_rot90(sqm):
+  return np.sum(np.rot90(sqm))
+
+
+def numpy_diag(sqm):
+  return np.sum(np.diag(sqm))
+
+
+# def numpy_diagflat(...):
+#   return np.diagflat(...)
+
+
+def numpy_tril(sqm):
+  return np.sum(np.tril(sqm))
+
+
+def numpy_triu(sqm):
+  return np.sum(np.triu(sqm))
+
+
+# def numpy_unique(...):
+#   return np.unique(...)
+#
+#
+# def numpy_intersect1d(...):
+#   return np.intersect1d(...)
+#
+#
+# def numpy_setxor1d(...):
+#   return np.setxor1d(...)
+#
+#
+# def numpy_union1d(...):
+#   return np.union1d(...)
+#
+#
+# def numpy_setdiff1d(...):
+#   return np.setdiff1d(...)
+#
+#
+# def numpy_ediff1d(...):
+#   return np.ediff1d(...)
+#
+#
+# def numpy_select(...):
+#   return np.select(...)
+#
+#
+# def numpy_copy(...):
+#   return np.copy(...)
+#
+#
+# def numpy_delete(...):
+#   return np.delete(...)
+#
+#
+# def numpy_insert(...):
+#   return np.insert(...)
+#
+#
+# def numpy_append(...):
+#   return np.append(...)
+#
+#
+# def numpy_extract(...):
+#   return np.extract(...)
+#
+#
+# def numpy_trim_zeros(...):
+#   return np.trim_zeros(...)
 
 # Label is 0 or 1
 
@@ -505,10 +953,6 @@ def tfe_expand_dims_after(t):
 
 def tfe_squeeze_before(t):
   return tf.squeeze(tf.expand_dims(t, 0), 0)
-
-
-def tfe_squeeze_before(t):
-  return tf.squeeze(tf.expand_dims(t, 1), 1)
 
 
 def tfe_reshape_flat(t):

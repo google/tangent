@@ -65,7 +65,7 @@ def assert_result_matches_reference(
   tangent_value = tangent_func()
   try:
     reference_value = reference_func()
-  except (ImportError, TypeError) as e:
+  except (ImportError, TypeError, KeyError, NotImplementedError) as e:
     if __debug__:
       print('WARNING: Reference function call failed. The test will revert to '
             'the backup reference.\nReason for failure: %s' % e)

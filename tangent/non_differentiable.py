@@ -30,6 +30,7 @@ import tangent
 NON_DIFFERENTIABLE = set([
     len,
     numpy.shape, numpy.zeros, numpy.ones, numpy.zeros_like, numpy.ones_like,
+    numpy.ceil,
 ])
 
 
