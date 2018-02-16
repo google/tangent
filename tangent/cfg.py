@@ -157,10 +157,12 @@ class CFG(gast.NodeVisitor):
     self.head.extend(self.break_.pop())
 
   def visit_Break(self, node):
-    self.break_[-1].append(node)
+    self.break_[-1].extend(self.head)
+    self.head[:] = []
 
   def visit_Continue(self, node):
-    self.continue_[-1].append(node)
+    self.continue_[-1].extend(self.head)
+    self.head[:] = []
 
   def visit_Try(self, node):
     self.visit_statements(node.body)
