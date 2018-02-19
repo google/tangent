@@ -17,7 +17,8 @@ import gast
 
 LITERALS = (gast.Num, gast.Str, gast.Bytes, gast.Ellipsis, gast.NameConstant)
 
-CONTROL_FLOW = (gast.For, gast.AsyncFor, gast.While, gast.If, gast.Try)
+CONTROL_FLOW = (gast.For, gast.AsyncFor, gast.While, gast.If, gast.Try,
+                gast.Break, gast.Continue)
 
 COMPOUND_STATEMENTS = (
     gast.FunctionDef,
