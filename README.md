@@ -194,7 +194,7 @@ def f(x):
   c = a + b
   return c
 
-forward_df = tangent.grad(f, mode='forward')
+forward_df = tangent.autodiff(f, mode='forward')
 ```
 
 ![SCT Forward Mode](docs/sct-ad-forward.gif "SCT Forward Mode")
@@ -212,7 +212,7 @@ def f(x):
     b = a * x ** 2.0
     return tf.reduce_sum(b)
 
-hvp = tangent.grad(tangent.grad(f,mode='reverse'),mode='forward')
+hvp = tangent.autodiff(tangent.autodiff(f,mode='reverse'),mode='forward')
 ```
 
 ## Performance
