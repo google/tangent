@@ -62,6 +62,7 @@ from tangent import annotate
 from tangent import ast as ast_
 from tangent import comments
 from tangent import compile as compile_
+from tangent import desugar
 from tangent import fence
 from tangent import forward_ad
 from tangent import naming
@@ -87,6 +88,7 @@ def autodiff_ast(func, wrt, motion, mode, preserve_result, check_dims, verbose):
         for the returned function to run.
   """
   node = annotate.resolve_calls(func)
+  node = desugar.explicit_loop_indexes(node)
   fence.validate(node, inspect.getsource(func))
   node = anf_.anf(node)
   if verbose >= 2:
