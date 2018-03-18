@@ -150,12 +150,19 @@ class ANF(transformers.TreeTransformer):
     return node
 
   def visit_AugAssign(self, node):
+    self.src = quoting.unquote(node)
     self.trivializing = True
-    left = self.trivialize(node.target)
+    self.namer.target = node.target
     right = self.trivialize(node.value)
+    target = self.trivialize(node.target)
+    left = gast.Name(id=target.id, ctx=gast.Load(), annotation=None)
+    node = gast.Assign(targets=[target],
+                       value=gast.BinOp(
+                        left=left, op=node.op, right=right))
+    self.mark(node)
+    node = self.generic_visit(node)
+    self.namer.target = None
     self.trivializing = False
-    node = gast.Assign(targets=[node.target],
-                       value=gast.BinOp(left=left, op=node.op, right=right))
     return node
 
   def visit_Assign(self, node):
@@ -182,7 +189,7 @@ class ANF(transformers.TreeTransformer):
         self.append(stmt)
       node.targets[0] = target
     elif not isinstance(node.targets[0], gast.Name):
-      raise ValueError
+      raise ValueError('Cannot Assign to %s' % type(node.target))
     node = self.generic_visit(node)
     self.namer.target = None
     self.trivializing = False

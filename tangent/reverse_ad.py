@@ -428,6 +428,10 @@ class ReverseAD(object):
   def visit_Attribute(self, node):
     raise ValueError('attributes are not yet supported for gradients')
 
+  def visit_AugAssign(self, node):
+    raise ValueError('AugAssign not supported for gradients. '
+      'Should have been removed by ANF. This is a bug.')
+
   def visit_Assign(self, node):
     """Visit assignment statement."""
     if len(node.targets) != 1:

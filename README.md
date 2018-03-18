@@ -19,7 +19,7 @@ This project is an experimental release, and is under active development. As we 
 
 ## Usage
 
-Note: An interactive notebook with all the code in this page can be found [here](https://colab.research.google.com/notebook#fileId=1TDe5g25mhgtmPKbxOdwXlQ1pHm-VYFXB).
+Note: An interactive notebook with all the code in this page can be found [here](https://colab.research.google.com/notebook#fileId=1cjoX9GteBymbnqcikNMZP1uenMcwAGDe).
 
 Tangent has a one-function API:
 ```python
@@ -194,7 +194,7 @@ def f(x):
   c = a + b
   return c
 
-forward_df = tangent.grad(f, mode='forward')
+forward_df = tangent.autodiff(f, mode='forward')
 ```
 
 ![SCT Forward Mode](docs/sct-ad-forward.gif "SCT Forward Mode")
@@ -212,7 +212,7 @@ def f(x):
     b = a * x ** 2.0
     return tf.reduce_sum(b)
 
-hvp = tangent.grad(tangent.grad(f,mode='reverse'),mode='forward')
+hvp = tangent.autodiff(tangent.autodiff(f,mode='reverse'),mode='forward')
 ```
 
 ## Performance
