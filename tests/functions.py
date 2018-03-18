@@ -225,6 +225,12 @@ def test_list_and_subscript(a):
   x = [1.0, a, 3.0]
   return x[0] * x[1]
 
+def test_implicit_indexing(x):
+  res = 0.0
+  for a in x:
+    res += a
+  return res
+
 # TODO: needs a numpy equivalent, and all iterables collections too
 # def test_subscript_overwrite(a):
 #     x = [1,a*a,3]
