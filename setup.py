@@ -7,6 +7,9 @@ with open('README.md') as f:
 with open('LICENSE') as f:
   lic = f.read()
 
+with open('requirements.txt') as f:
+  reqs = list(f.read().strip().split('\n'))
+
 setup(
     name='tangent',
     version='0.1.9',
@@ -23,14 +26,5 @@ setup(
         'autodiff', 'automatic-differentiation', 'machine-learning',
         'deep-learning'
     ],
-    install_requires=[
-        'astor>=0.6',
-        'autograd>=1.2',
-        'enum34',
-        'future',
-        'gast',
-        'nose',
-        'numpy',
-        'six',
-        'tf-nightly==1.5.0.dev20171026',
-    ])
+    install_requires=reqs,
+)

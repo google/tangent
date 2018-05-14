@@ -13,7 +13,6 @@
 #      limitations under the License.
 """Utilities for tracing code, a useful fallback when ahead-of-time AD fails.
 """
-from tensorflow.python.eager.backprop import make_vjp
 
 
 class Traceable(object):
@@ -22,6 +21,7 @@ class Traceable(object):
 
 def trace_grad(fn, args):
   """Trace a function, and return a VJP and the function's output."""
+  from tensorflow.python.eager.backprop import make_vjp
   result, vjp = make_vjp(fn)(*args)
   return result, vjp
 

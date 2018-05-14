@@ -24,7 +24,13 @@ import autograd.numpy as np
 import pytest
 import tangent
 import tfe_utils
-import tensorflow as tf
+
+@pytest.fixture
+def tf():
+  try:
+    import tensorflow as tf
+  except ImportError:
+    pytest.skip()
 
 
 # This test function broke HVPs several times
@@ -46,7 +52,7 @@ def f_calltree(x):
   return np.sum(b)
 
 
-def tf_straightline(x):
+def tf_straightline(x, tf):
   a = x * x * x
   b = a * x ** 2.0
   return tf.reduce_sum(b)
@@ -76,7 +82,7 @@ def _test_hvp(func, optimized):
       assert np.allclose(dx, dx_ag)
 
 
-def _test_tf_hvp(func, optimized):
+def _test_tf_hvp(func, optimized, tf):
   a = tf.random_normal(shape=(300,))
   v = tf.reshape(a, shape=(-1,))
 
@@ -98,16 +104,16 @@ def _test_tf_hvp(func, optimized):
       assert dx.shape == a.shape
 
 
-def test_hvp_complex_tf(optimized):
-  _test_tf_hvp(tf_straightline, optimized)
+def test_hvp_complex_tf(optimized, tf):
+  _test_tf_hvp(tf_straightline, optimized, tf)
 
 
-def test_hvp_straightline(optimized):
-  _test_hvp(f_straightline, optimized)
+def test_hvp_straightline(optimized, tf):
+  _test_hvp(f_straightline, optimized, tf)
 
 
-def test_hvp_calltree(optimized):
-  _test_hvp(f_calltree, optimized)
+def test_hvp_calltree(optimized, tf):
+  _test_hvp(f_calltree, optimized, tf)
 
 
 if __name__ == '__main__':
