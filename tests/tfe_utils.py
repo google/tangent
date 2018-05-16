@@ -14,13 +14,18 @@
 """TFE-specific test utils."""
 import numpy as np
 
+import pytest
 from tangent.grad_util import autodiff, jvp
 import utils
 
-import tensorflow as tf
-from tensorflow.contrib.eager.python import tfe
-
-tfe.enable_eager_execution()
+try:
+  import tensorflow as tf
+  from tensorflow.contrib.eager.python import tfe
+except ImportError:
+  tf = None
+  tfe = None
+else:
+  tfe.enable_eager_execution()
 
 
 def register_parametrizations(metafunc, short):
@@ -30,58 +35,73 @@ def register_parametrizations(metafunc, short):
     # Note: care must be exercised when sharing tensor objects. Although
     # immutable, references to the same value will be interpreted as the same
     # variable, with unexpected side effects.
-    vectors = [
-        np.random.randn(i)
-        for i in (
-            (3,) if short else (3, 5, 10))]
-    tensors = [tf.constant(v, dtype=tf.float32) for v in vectors]
+    if tf:
+      vectors = [
+          np.random.randn(i)
+          for i in (
+              (3,) if short else (3, 5, 10))]
+      tensors = [tf.constant(v, dtype=tf.float32) for v in vectors]
+    else:
+      tensors = [pytest.mark.skip(None, reason='tensorflow not present')(None)]
     if arg in metafunc.fixturenames:
       metafunc.parametrize(arg, tensors)
 
   for arg in ['mat1', 'mat2']:
-    matrices = [
+    if tf:
+      matrices = [
         np.random.randn(*i)
         for i in (
             ((3, 3),) if short else (
                 (1, 1),
                 (3, 3),
                 (5, 5)))]
-    tensors = [tf.constant(m, dtype=tf.float32) for m in matrices]
+      tensors = [tf.constant(m, dtype=tf.float32) for m in matrices]
+    else:
+      tensors = [pytest.mark.skip(None, reason='tensorflow not present')(None)]
     if arg in metafunc.fixturenames:
       metafunc.parametrize(arg, tensors)
 
   if 's' in metafunc.fixturenames:
-    if short:
-      scalars = [tf.constant(1.0)]
+    if tf:
+      if short:
+        scalars = [tf.constant(1.0)]
+      else:
+        scalars = [tf.constant(c) for c in (0.0, 1.0, 2.0)]
     else:
-      scalars = [tf.constant(c) for c in (0.0, 1.0, 2.0)]
+      scalars = [pytest.mark.skip(reason='tensorflow not present')(None)]
     metafunc.parametrize('s', scalars)
 
   for arg in ['timage', 'timage1', 'timage2']:
     if arg in metafunc.fixturenames:
-      images = [
-          np.random.randn(*i)
-          for i in (
+      if tf:
+        images = [
+            np.random.randn(*i)
+            for i in (
               ((2, 3, 3, 3),) if short else (
-                  (2, 1, 1, 3),
-                  (2, 3, 3, 3),
-                  (2, 5, 5, 3),
-              ))
-      ]
-      timages = [tf.constant(v, dtype=tf.float32) for v in images]
+                    (2, 1, 1, 3),
+                    (2, 3, 3, 3),
+                    (2, 5, 5, 3),
+                ))
+        ]
+        timages = [tf.constant(v, dtype=tf.float32) for v in images]
+      else:
+        timages = [pytest.mark.skip(reason='tensorflow not present')(None)]
       metafunc.parametrize(arg, timages)
 
   if 'tkernel' in metafunc.fixturenames:
-    kernels = [
-        np.random.randn(*i)
-        for i in (
-            ((3, 3, 3, 1),) if short else (
-                (3, 3, 3, 1),
-                (3, 3, 3, 2),
-                (5, 5, 3, 3),
-            ))
-    ]
-    tkernels = [tf.constant(v, dtype=tf.float32) for v in kernels]
+    if tf:
+      kernels = [
+          np.random.randn(*i)
+          for i in (
+              ((3, 3, 3, 1),) if short else (
+                  (3, 3, 3, 1),
+                  (3, 3, 3, 2),
+                  (5, 5, 3, 3),
+              ))
+      ]
+      tkernels = [tf.constant(v, dtype=tf.float32) for v in kernels]
+    else:
+      tkernels = [pytest.mark.skip(reason='tensorflow not present')(None)]
     metafunc.parametrize('tkernel', tkernels)
 
   if 'conv2dstrides' in metafunc.fixturenames:

@@ -27,7 +27,10 @@ import numpy as np
 import tangent
 from tangent import insert_grad_of
 
-import tensorflow as tf
+try:
+  import tensorflow as tf
+except ImportError:
+  tf = None
 
 
 def id_(a):

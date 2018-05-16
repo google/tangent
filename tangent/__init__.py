@@ -43,7 +43,10 @@ from tangent.utils import unreduce_like
 # Imported last to avoid circular imports
 from tangent.grad_util import grad, autodiff, vjp, jvp
 from tangent.errors import *
-from tangent.tf_extensions import *
+try:
+  from tangent.tf_extensions import *
+except ImportError:
+  pass
 
 
 class RemoveWith(gast.NodeTransformer):
