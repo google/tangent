@@ -263,7 +263,7 @@ def autodiff(func,
         If True,
         > val = func(*args)
         > df = grad(func,preserve_result=True)
-        > gradval, val = func(*args)
+        > gradval, val = df(*args)
         Note that if taking gradients with respect to multiple arguments,
         the primal value will be appended to the return signature. Ex:
         > val = func(x,y)
@@ -353,7 +353,7 @@ def grad(func,
         If True,
         > val = func(*args)
         > df = grad(func,preserve_result=True)
-        > gradval, val = func(*args)
+        > gradval, val = df(*args)
         Note that if taking gradients with respect to multiple arguments,
         the primal value will be appended to the return signature. Ex:
         > val = func(x,y)
