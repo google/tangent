@@ -172,9 +172,9 @@ You can use the `insert_grad_of` feature to do more than debugging and logging. 
 def f(params, x):
   h = x
   for i in range(5):
-  with insert_grad_of(h) as g:
-    g = tf.clip_by_value(g, -1, 1)
-  h = rnn(params, h)
+    with insert_grad_of(h) as g:
+      g = tf.clip_by_value(g, -1, 1)
+    h = rnn(params, h)
   return h
 
 dfdparams = tangent.grad(f)
