@@ -272,7 +272,7 @@ class Remove(gast.NodeTransformer):
       if not node.orelse:
         return
       else:
-        node.test = gast.UnaryOp(op=gast.Not, operand=node.test)
+        node.test = gast.UnaryOp(op=gast.Not(), operand=node.test)
         node.body, node.orelse = node.orelse, node.body
     elif isinstance(node, (gast.While, gast.For)) and not node.body:
       return node.orelse
