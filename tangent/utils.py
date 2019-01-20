@@ -128,6 +128,8 @@ def create_unbroadcast_axis(shape, broadcast_shape):
     A list. The axes along which the array needs to be reduced. These axes will
     be distributed evenly into the original shape.
   """
+  if not broadcast_shape:
+    return ()
   return tuple(
       -(1 + i)
       for i in range(len(broadcast_shape))
@@ -144,8 +146,12 @@ def unbroadcast_numpy_to(array, shape):
   Returns:
     Array with dimensions summed to match `shape`.
   """
+  if array.shape == shape:
+      return array
   axis = create_unbroadcast_axis(shape, numpy.shape(array))
-  return numpy.reshape(numpy.sum(array, axis=axis), shape)
+  array = numpy.sum(array, axis=axis)
+  array.reshape(shape)
+  return array
 
 
 def unreduce(array, shape, axis, keepdims):
@@ -269,8 +275,8 @@ def astype(array, y):
     An array or number with the same dtype as `y`.
   """
   if isinstance(y, autograd.core.Node):
-    return array.astype(numpy.array(y.value).dtype)
-  return array.astype(numpy.array(y).dtype)
+    return array.astype(numpy.asarray(y.value).dtype)
+  return array.astype(numpy.asarray(y).dtype)
 
 
 def balanced_eq(x, z, y):
@@ -425,13 +431,14 @@ def add_grad_numpy_int_argument(left, right):
         'float. This may happen if you differentiate with respect to an '
         'integer argument and may lead to unexpected results.')
     upcasting_int_warnings_left -= 1
-  right = unbroadcast(numpy.array(right), left)
+  right = unbroadcast(numpy.asarray(right), left)
   return left + right
 
 
 def add_grad_numpy(left, right):
-  right = unbroadcast(numpy.array(right), left)
-  return left + right
+  right = unbroadcast(numpy.asarray(right), left)
+  right += left
+  return right
 
 
 def add_grad_list(left, right):
@@ -769,9 +776,12 @@ def grad_dot(dy, x1, x2):
   elif len(numpy.shape(x2)) == 1:
     dy = numpy.transpose(numpy.atleast_2d(dy))
     x2 = numpy.transpose(numpy.atleast_2d(x2))
-  x2_t = numpy.transpose(numpy.atleast_2d(
-      numpy.sum(x2, axis=tuple(numpy.arange(numpy.ndim(x2) - 2)))))
-  dy_x2 = numpy.sum(dy, axis=tuple(-numpy.arange(numpy.ndim(x2) - 2) - 2))
+  if numpy.ndim(x2) - 2 != 0:
+    x2 = numpy.sum(x2, axis=tuple(numpy.arange(numpy.ndim(x2) - 2)))
+    dy_x2 = numpy.sum(dy, axis=tuple(-numpy.arange(numpy.ndim(x2) - 2) - 2))
+  else:
+    dy_x2 = dy
+  x2_t = numpy.transpose(numpy.atleast_2d(x2))
   return numpy.reshape(numpy.dot(dy_x2, x2_t), numpy.shape(x1))
 
 
