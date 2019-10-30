@@ -57,7 +57,7 @@ register_shape_function(resource_variable_ops.ResourceVariable, shape_as_list)
 
 
 non_differentiable.register_non_differentiable_functions(
-    tf.shape, tf.cast, tf.equal, tf.constant,
+    tf.shape, tf.cast, tf.float32, tf.equal, tf.constant,
     tf.zeros, tf.ones, tf.zeros_like, tf.ones_like,
     size, shape_as_list, dtype)
 
@@ -272,8 +272,8 @@ def dtfdivide(z, x, y):
 
 @adjoint(tf.maximum)
 def dtfmaximum(z, x, y):
-  d[x] = tf.multiply(d[z], tf.cast(tf.equal(z, x)))
-  d[y] = tf.multiply(d[z], tf.cast(tf.equal(z, y)))
+  d[x] = tf.multiply(d[z], tf.cast(tf.equal(z, x), tf.float32))
+  d[y] = tf.multiply(d[z], tf.cast(tf.equal(z, y), tf.float32))
 
 
 @adjoint(tf.squared_difference)
@@ -388,7 +388,7 @@ def ttfreduce_max(y, x, axis=None, keep_dims=False):
   mask = tf.cast(
       tf.equal(
           tangent.unreduce(
-              tf.ones_like(y), tangent.shape_as_list(x), axis, keep_dims), x))
+              tf.ones_like(y), tangent.shape_as_list(x), axis, keep_dims), x), tf.float32)
   d[y] = tf.multiply(d[x], mask)
 
 
@@ -421,7 +421,7 @@ def ttfdivide(z, x, y):
 
 @tangent_(tf.maximum)
 def ttfmaximum(z, x, y):
-  d[z] = d[x] * tf.cast(tf.equal(z, x)) + d[y] * tf.cast(tf.equal(z, y))
+  d[z] = d[x] * tf.cast(tf.equal(z, x), tf.float32) + d[y] * tf.cast(tf.equal(z, y), tf.float32)
 
 
 @tangent_(tf.nn.avg_pool)
