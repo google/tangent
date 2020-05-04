@@ -6,3 +6,4 @@ gast
 nose
 numpy
 six
+test
