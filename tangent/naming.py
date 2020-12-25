@@ -95,7 +95,7 @@ class Namer(object):
   """Generate human-readable names for AST nodes.
 
   Given an AST node, this class tries to produce a sensible variable name
-  that it could be subtituted with.
+  that it could be substituted with.
 
   In principle, it will try to construct sensible names from the operands and
   operator e.g. `x + y` becomes `x_plus_y`. However, the length of these
